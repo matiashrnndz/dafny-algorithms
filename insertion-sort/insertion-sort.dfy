@@ -18,6 +18,7 @@ method InsertionSort(A:array<int>)
 	while i < A.Length
 		invariant 0 <= i <= A.Length
 		invariant sorted(A[..i])
+        decreases A.Length - i
 	{
         var n := A[i];
         var j := i - 1;
@@ -26,6 +27,7 @@ method InsertionSort(A:array<int>)
             invariant sorted(A[..j+1])
             invariant forall k, m :: 0 <= k < j+1 && j+2 <= m < i+1 ==> A[k] <= A[m]
             invariant forall k :: j+2 <= k < i+1 ==> n <= A[k]
+            decreases j
         {
             A[j+1] := A[j];
             j := j - 1;
