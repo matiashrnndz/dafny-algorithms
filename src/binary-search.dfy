@@ -1,4 +1,3 @@
-
 predicate sorted(S:seq<int>) {
     forall i, j :: 0 <= i <= j < |S| ==> S[i] <= S[j]
 }
