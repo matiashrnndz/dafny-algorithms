@@ -6,20 +6,20 @@ method BinarySearch(A:array<int>, key:int) returns (index:int)
     ensures index < 0 ==> key !in A[..]
 {
     var N := A.Length;
-    var low :=0;
-    var high := N;
-    while low < high
-        invariant 0 <= low <= high <= N
-        invariant key !in A[..low]
-        invariant key !in A[high..]
+    var l := 0;
+    var h := N;
+    while l < h
+        invariant 0 <= l <= h <= N
+        invariant key !in A[..l]
+        invariant key !in A[h..]
     {
-        var mid := (low + high) / 2;
-        if key < A[mid] {
-            high := mid;
-        } else if key > A[mid] {
-            low := mid + 1;
+        var m := (l + h) / 2;
+        if key < A[m] {
+            h := m;
+        } else if key > A[m] {
+            l := m + 1;
         } else {
-            return mid;
+            return m;
         }
     }
     return -1;
