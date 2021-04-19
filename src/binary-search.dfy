@@ -1,16 +1,15 @@
-predicate sorted(S:seq<int>) {
-    forall i, j :: 0 <= i <= j < |S| ==> S[i] <= S[j]
-}
+include "../src/sorted.dfy"
 
 method BinarySearch(A:array<int>, key:int) returns (index:int)
-    requires sorted(A[..])
+    requires sorted(A)
     ensures 0 <= index ==> index < A.Length && A[index] == key
     ensures index < 0 ==> key !in A[..]
 {
+    var N := A.Length;
     var low :=0;
-    var high := A.Length;
+    var high := N;
     while low < high
-        invariant 0 <= low <= high <= A.Length
+        invariant 0 <= low <= high <= N
         invariant key !in A[..low]
         invariant key !in A[high..]
     {

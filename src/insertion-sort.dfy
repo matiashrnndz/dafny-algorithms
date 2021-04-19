@@ -1,37 +1,29 @@
-predicate sorted(S:seq<int>) {
-    forall i, j :: 0 <= i <= j < |S| ==> S[i] <= S[j]
-}
-
-lemma sortedVoid(S:seq<int>) 
-    requires |S| == 0
-    ensures sorted(S) == true
-{ 
-    assert(sorted(S) == true);
-}
+include "../src/sorted.dfy"
 
 method InsertionSort(A:array<int>)
 	modifies A
-	ensures sorted(A[..])
+	ensures sorted(A)
 {
+    var N := A.Length;
 	var i := 0;
-	while i < A.Length
-		invariant 0 <= i <= A.Length
-		invariant sorted(A[..i])
-        decreases A.Length - i
+	while i < N
+		invariant 0 <= i <= N
+		invariant sorted_between(A, 0, i-1)
+        decreases N - i
 	{
-        var n := A[i];
+        var x := A[i];
         var j := i - 1;
-        while j >= 0 && A[j] > n
-            invariant sorted(A[j+2..i+1])
-            invariant sorted(A[..j+1])
-            invariant forall k, m :: 0 <= k < j+1 && j+2 <= m < i+1 ==> A[k] <= A[m]
-            invariant forall k :: j+2 <= k < i+1 ==> n <= A[k]
+        while j >= 0 && A[j] > x
+            invariant sorted_between(A, 0, j)
+            invariant sorted_between(A, j+2, i)
+            invariant forall k :: j+2 <= k <= i ==> x <= A[k]
+            invariant forall k, k' :: 0 <= k <= j && j+2 <= k' <= i ==> A[k] <= A[k']
             decreases j
         {
             A[j+1] := A[j];
             j := j - 1;
         }
-        A[j+1] := n;
+        A[j+1] := x;
         i := i + 1;
 	}
 }
