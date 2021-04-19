@@ -1,16 +1,16 @@
 include "../src/sorted.dfy"
 
 method InsertionSort(A:array<int>)
-	modifies A
-	ensures sorted(A)
+    modifies A
+    ensures sorted(A)
 {
     var N := A.Length;
-	var i := 0;
-	while i < N
-		invariant 0 <= i <= N
-		invariant sorted_between(A, 0, i-1)
+    var i := 0;
+    while i < N
+        invariant 0 <= i <= N
+        invariant sorted_between(A, 0, i-1)
         decreases N - i
-	{
+    {
         var x := A[i];
         var j := i - 1;
         while j >= 0 && A[j] > x
@@ -25,7 +25,7 @@ method InsertionSort(A:array<int>)
         }
         A[j+1] := x;
         i := i + 1;
-	}
+    }
 }
 
 method Main() {
