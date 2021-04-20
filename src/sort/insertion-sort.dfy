@@ -1,4 +1,4 @@
-include "../src/sorted.dfy"
+include "../../src/sorted.dfy"
 
 method InsertionSort(A:array<int>)
     modifies A
