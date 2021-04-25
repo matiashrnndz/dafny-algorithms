@@ -3,18 +3,22 @@ include "../../src/sorted.dfy"
 method BubbleSort(A:array<int>)
     modifies A
     ensures sorted(A)
+    ensures multiset(A[..]) == multiset(old(A[..]))
 {
     var N := A.Length;
     var i := N-1;
     while 0 < i
+        invariant multiset(A[..]) == multiset(old(A[..]))
         invariant sorted_between(A, i, N-1)
         invariant forall k, k' :: 0 <= k <= i < k' < N ==> A[k] <= A[k']
         decreases i
     {
+        print A[..], "\n";
         var j := 0;
         while j < i
             invariant 0 < i < N
             invariant 0 <= j <= i
+            invariant multiset(A[..]) == multiset(old(A[..]))
             invariant sorted_between(A, i, N-1)
             invariant forall k, k' :: 0 <= k <= i < k' < N ==> A[k] <= A[k']
             invariant forall k :: 0 <= k <= j ==> A[k] <= A[j]
@@ -23,10 +27,12 @@ method BubbleSort(A:array<int>)
             if A[j] > A[j+1]
             {
                 A[j], A[j+1] := A[j+1], A[j];
+                print A[..], "\n";
             }
             j := j+1;
         } 
         i := i-1;
+        print "\n";
     }
 }
 

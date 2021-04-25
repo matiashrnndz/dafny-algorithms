@@ -2,7 +2,7 @@
 predicate sorted_between(A:array<int>, from:int, to:int)
     reads A
 {
-    forall i, j :: from <= i <= j <= to && 0 <= i <= j < A.Length ==> A[i] <= A[j]
+    forall i, j :: 0 <= i <= j < A.Length && from <= i <= j <= to ==> A[i] <= A[j]
 }
 
 predicate sorted(A:array<int>)
