@@ -20,7 +20,7 @@ method InsertionSort(A:array<int>)
             invariant 1 <= i <= N-1
             invariant 0 <= j <= i
             invariant multiset(A[..]) == multiset(old(A[..]))
-            invariant forall k, k' :: 0 <= k < k' < i+1 && k' != j ==> A[k] <= A[k']
+            invariant forall m, n :: 0 <= m < n < i+1 && n != j ==> A[m] <= A[n]
             decreases j
         {
             A[j], A[j-1] := A[j-1], A[j];
@@ -35,7 +35,14 @@ method InsertionSort(A:array<int>)
 method Main() {
     var A := new int[10];
     A[0], A[1], A[2], A[3], A[4], A[5], A[6], A[7], A[8], A[9] := 2, 4, 6, 15, 3, 19, 17, 16, 18, 1;
-
     InsertionSort(A);
     print A[..];
 }
+
+/* Explicación:
+
+invariant forall m, n :: 0 <= m < n < i+1 && n != j ==> A[m] <= A[n]
+    // A está ordenado para cada par de elementos 
+    // excepto para los que el índice del segundo elemento sea igual a j
+
+*/
