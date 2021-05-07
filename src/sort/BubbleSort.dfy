@@ -1,4 +1,4 @@
-include "../../src/sorted.dfy"
+include "../../src/Sorted.dfy"
 
 method BubbleSort(A:array<int>)
     modifies A
