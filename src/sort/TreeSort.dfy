@@ -1,5 +1,5 @@
 include "../../src/Sorted.dfy"
-include "../data-types/binary-tree/TreeSet.dfy"
+include "../data-types/binary-tree/BinaryTree.dfy"
 
 method TreeSort(A:array<int>) returns (sortedSeq:seq<int>)
     requires A.Length > 0
