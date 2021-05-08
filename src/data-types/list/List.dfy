@@ -8,10 +8,19 @@ function create(): List<T>
   List_Empty
 }
 
-function method List_Insert(a:List<T>, x:T) : List<T>
-  decreases a
+function method List_Size(list:List<T>) : int
+  decreases list
 {
-  match a {
+  match list {
+    case List_Empty => 0
+    case Cons(h, t) => List_Size(t) + 1
+  }
+}
+
+function method List_Insert(list:List<T>, x:T) : List<T>
+  decreases list
+{
+  match list {
     case List_Empty => Cons(x, List_Empty)
     case Cons(h, t) => Cons(h, List_Insert(t, x))
   }
@@ -26,14 +35,14 @@ function method List_Concat(a:List<T>, b:List<T>) : List<T>
   }
 }
 
-function List_Head(xs:List<T>): T
+function method List_Head(xs:List<T>): T
   requires xs != List_Empty
 {
   match xs
     case Cons(y, ys) => y
 }
 
-function List_Tail(xs:List<T>): List<T>
+function method List_Tail(xs:List<T>): List<T>
 {
   match xs
     case List_Empty => List_Empty
