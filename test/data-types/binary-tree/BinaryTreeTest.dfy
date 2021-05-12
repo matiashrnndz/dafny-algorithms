@@ -4,6 +4,7 @@ method Main() {
   InOrderElemsTest();
   InsertTest();
   InsertWorstCaseTest();
+  MirrorTest();
 }
 
 method InOrderElemsTest() {
@@ -33,4 +34,11 @@ method InsertWorstCaseTest() {
   tree := BinaryTree_Insert(tree, 7);
   var expected := Node(Leaf, 1, Node(Leaf, 3, Node(Leaf, 4, Node(Leaf, 5, Node(Leaf, 7, Leaf)))));
   assert(tree == expected);
+}
+
+method MirrorTest() {
+  var tree: BinaryTree<int> := Node(Node(Node(Leaf,1,Leaf),3,Leaf),4,Node(Node(Leaf, 5, Leaf),7,Leaf));
+  var mirroredTree := BinaryTree_Mirror(tree);
+  var expected := Node(Node(Leaf, 7, Node(Leaf, 5, Leaf)), 4, Node(Leaf, 3, Node(Leaf, 1, Leaf)));
+  assert(mirroredTree == expected);
 }

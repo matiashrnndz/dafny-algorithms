@@ -23,3 +23,12 @@ function method BinaryTree_Insert(tree:BinaryTree<T>, x:int): BinaryTree<T>
       else tree
   }
 }
+
+function method BinaryTree_Mirror(tree:BinaryTree<T>): BinaryTree<T>
+  decreases tree
+{
+  match tree {
+    case Leaf => Leaf
+    case Node(l, d, r) => Node(BinaryTree_Mirror(r), d, BinaryTree_Mirror(l))
+  }
+}
