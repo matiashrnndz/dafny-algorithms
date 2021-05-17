@@ -5,6 +5,7 @@ method Main() {
   ConcatTwoListsTest();
   SizeZeroTest();
   SizeTest();
+  ElemsTest();
 }
 
 method InsertIntoListTest() {
@@ -43,4 +44,11 @@ method SizeTest() {
   var size := List_Size(list);
   var expected := 5;
   assert(expected == size);
+}
+
+method ElemsTest() {
+  var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
+  var elems: seq<int> := List_Elems(list);
+  var expected := [2, 10, 4, 12, 7];
+  assert(expected == elems);
 }
