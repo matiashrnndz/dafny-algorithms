@@ -48,7 +48,7 @@ method SizeTest() {
 
 method ElemsTest() {
   var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
-  var elems: seq<int> := List_Elems(list);
+  var elems: seq<int> := List_ToSeq(list);
   var expected := [2, 10, 4, 12, 7];
   assert(expected == elems);
 }

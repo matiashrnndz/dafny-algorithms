@@ -1,25 +1,21 @@
 include "../../src/Sorted.dfy"
-include "../data-types/binary-tree/BinaryTree.dfy"
+include "../data-types/binary-tree/BST.dfy"
 
-method TreeSort(L:List<int>) returns (sorted:List<int>)
-  requires List_Size(L) > 0 // verificar si puedo sacarlo
-  // agregar un predicado ensures que diga cuando el tree está ordenado
+method TreeSort(L:List<int>) returns (sortedList:List<int>)
+  ensures list_ascending_order(sortedList)
 {
-  var N := List_Size(L);
-  var list := L; // averiguar si es referencia o valor
-  var tree: BinaryTree<int> := Leaf;
+  var tree: BST<int> := BST_Init();
+  var list := L;
 
   while list != List_Empty
+    invariant bst_is_ordered(tree)
     decreases list
   {
-    var head: int := List_Head(list);
-    tree := BinaryTree_Insert(tree, head);
+    tree := BST_Insert(tree, List_Head(list));
     list := List_Tail(list);
   }
 
-  sorted := BinaryTree_InOrderElems(tree);
+  sortedList := BST_InOrder(tree);
 
-  return sorted;
+  return sortedList;
 }
-
-// predicado que toma un tree y diga cuando un arbol está ordenado

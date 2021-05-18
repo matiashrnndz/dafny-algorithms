@@ -1,11 +1,13 @@
 type T = int
 
+// -------------------------- Datatype -------------------------- //
+
 datatype List_Empty = Nil
 datatype List<T> = List_Empty | Cons(head:T, tail:List<T>)
 
 // ------------------------- Functions -------------------------- //
 
-function create(): List<T>
+function List_Init(): List<T>
 {
   List_Empty
 }
@@ -17,7 +19,7 @@ function method {:tailrecursion true} List_Size(list:List<T>) : int
 {
   match list {
     case List_Empty => 0
-    case Cons(h, t) => List_Size(t) + 1
+    case Cons(head, tail) => 1 + List_Size(tail)
   }
 }
 
@@ -26,65 +28,82 @@ function method List_Insert(list:List<T>, x:T) : List<T>
 {
   match list {
     case List_Empty => Cons(x, List_Empty)
-    case Cons(h, t) => Cons(h, List_Insert(t, x))
+    case Cons(head, tail) => Cons(head, List_Insert(tail, x))
   }
 }
 
 function method List_Concat(a:List<T>, b:List<T>) : List<T>
   decreases a
-  ensures List_Elems(List_Concat(a, b)) == List_Elems(a) + List_Elems(b)
+  ensures List_ToSeq(List_Concat(a, b)) == List_ToSeq(a) + List_ToSeq(b)
   ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
 {
   match a {
     case List_Empty => b
-    case Cons(h, t) =>
-      match b {
-        case List_Empty => a
-        case Cons(hb, tb) => Cons(h, List_Concat(t, Cons(hb, tb)))
-    }
+    case Cons(head, tail) =>  Cons(head, List_Concat(tail, b))
   }
 }
 
-function method List_Head(xs:List<T>): T
-  requires xs != List_Empty
+function method List_Head(list:List<T>) : (head:T)
+  requires list != List_Empty
 {
-  match xs
-    case Cons(y, ys) => y
+  match list
+    case Cons(head, tail) => head
 }
 
-function method List_Tail(xs:List<T>): List<T>
+function method List_Tail(list:List<T>) : (tail:List<T>)
+  ensures if list != List_Empty then List_Size(tail) == List_Size(list) - 1 else List_Size(tail) == 0
 {
-  match xs
+  match list
     case List_Empty => List_Empty
-    case Cons(y, ys) => ys
+    case Cons(head, tail) => tail
+}
+
+function List_Contains(list:List<T>, x:T) : bool
+  decreases list
+{
+  match list {
+    case List_Empty => false
+    case Cons(head, tail) => head == x || List_Contains(tail, x) 
+  }
 }
 
 // ------------------------- Methods -------------------------- //
 
-method {:tailrecursion true} List_Print(a:List<T>) 
-  decreases a
+method {:tailrecursion true} List_Print(list:List<T>) 
+  decreases list
 {
-  match a {
+  match list {
     case List_Empty => {
       return;
     }
-    case Cons(h, List_Empty) => {
-      print h, "\n";
+    case Cons(head, List_Empty) => {
+      print head, "\n";
       return;
     }
-    case Cons(h, t) => {
-      print h, ", ";
-      List_Print(t);
+    case Cons(head, tail) => {
+      print head, ", ";
+      List_Print(tail);
     }
   }
 }
 
-function method List_Elems(a:List<T>): seq<T>
-  decreases a
+function method List_ToSeq(list:List<T>) : (s:seq<T>)
+  // Ensures que tengan los mismos elementos la lista y la seq
+  decreases list
 {
-  match a {
+  match list {
     case List_Empty => []
-    case Cons(h, t) => [h] + List_Elems(t)
+    case Cons(head, tail) => [head] + List_ToSeq(tail)
+  }
+}
+
+function method List_ToSet(list:List<T>) : (s:set<T>)
+  // Ensures que tengan los mismos elementos la lista y el set
+  decreases list
+{
+  match list {
+    case List_Empty => {}
+    case Cons(head, tail) => {head} + List_ToSet(tail)
   }
 }
 
@@ -95,38 +114,38 @@ predicate list_ascending_order(list:List<T>)
 {
   match list {
     case List_Empty => true
-    case Cons(h, List_Empty) => true
-    case Cons(h, Cons(ht, t)) => h <= ht && list_ascending_order(t)
+    case Cons(head, List_Empty) => true
+    case Cons(head, Cons(ht, tail)) => head <= ht && list_ascending_order(tail)
   }
 }
 
 // ------------------------ Lemmas ------------------------ //
 
-lemma {:induction false} ConcatElemsLemma(a:List<T>, b:List<T>)
-  ensures List_Elems(List_Concat(a, b)) == List_Elems(a) + List_Elems(b)
+lemma {:induction false} Lemma_ConcatElems(a:List<T>, b:List<T>)
+  ensures List_ToSeq(List_Concat(a, b)) == List_ToSeq(a) + List_ToSeq(b)
   decreases a, b
 {
   match a {
     case List_Empty =>
       calc == {
-        List_Elems(List_Concat(a, b));
-          { assert List_Elems(a) + List_Elems(b) == List_Elems(b); }
-        [] + List_Elems(b);
-          { assert List_Elems(a) == []; }
-        List_Elems(a) + List_Elems(b);
+        List_ToSeq(List_Concat(a, b));
+          { assert List_ToSeq(a) + List_ToSeq(b) == List_ToSeq(b); }
+        [] + List_ToSeq(b);
+          { assert List_ToSeq(a) == []; }
+        List_ToSeq(a) + List_ToSeq(b);
       }
     case Cons(ha, ta) =>
       calc == {
-        List_Elems(List_Concat(a, b));
-          { assert List_Elems(List_Concat(a, b)) == List_Elems(Cons(ha, List_Empty)) + List_Elems(List_Concat(ta, b)); }
-        List_Elems(Cons(ha, List_Empty)) + List_Elems(List_Concat(ta, b));
-          { ConcatElemsLemma(ta, b); }
-        List_Elems(a) + List_Elems(b);
+        List_ToSeq(List_Concat(a, b));
+          { assert List_ToSeq(List_Concat(a, b)) == List_ToSeq(Cons(ha, List_Empty)) + List_ToSeq(List_Concat(ta, b)); }
+        List_ToSeq(Cons(ha, List_Empty)) + List_ToSeq(List_Concat(ta, b));
+          { Lemma_ConcatElems(ta, b); }
+        List_ToSeq(a) + List_ToSeq(b);
       }
   }
 }
 
-lemma {:induction false} ConcatSizeLemma(a:List<T>, b:List<T>)
+lemma {:induction false} Lemma_ConcatSize(a:List<T>, b:List<T>)
   ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
   decreases a, b
 {
@@ -144,7 +163,7 @@ lemma {:induction false} ConcatSizeLemma(a:List<T>, b:List<T>)
         List_Size(List_Concat(a, b));
           { assert List_Size(List_Concat(a, b)) == List_Size(Cons(ha, List_Empty)) + List_Size(List_Concat(ta, b)); }
         List_Size(Cons(ha, List_Empty)) + List_Size(List_Concat(ta, b));
-          { ConcatSizeLemma(ta, b); }
+          { Lemma_ConcatSize(ta, b); }
         List_Size(a) + List_Size(b);
       }
   }
