@@ -25,36 +25,26 @@ function method BST_Size(tree:BST<T>) : (n:int)
 function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
   decreases tree
   requires bst_is_ordered(tree)
-  // ensures bst_is_ordered (result)
+  ensures bst_is_ordered(result)
 {
   match tree {
     case Leaf => Node(Leaf, d, Leaf)
     case Node(left, x, right) => 
-      if (d < x) 
-        then Node(BST_Insert(left, d), x, right)
-      else Node(left, x, BST_Insert(right, d))
+      if (d < x)
+        then BST_Insert(left, d)
+        else BST_Insert(right, d)
   }
 }
 
 function method BST_InOrder(tree:BST<T>) : (result:List<T>)
-  decreases tree
   requires bst_is_ordered(tree)
   ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
-  ensures list_is_ordered(BST_InOrder(tree))
+  ensures list_is_ordered(result) // Postcondition that might not hold
+  decreases tree
 {
   match tree {
     case Leaf => List_Empty
     case Node(left, x, right) => List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right)))
-  }
-}
-
-lemma {:induction tree} Lemma_IfBSTIsOrderedThenInOrderListIsOrdered(tree:BST<T>)
-  requires bst_is_ordered(tree)
-  ensures list_is_ordered(BST_InOrder(tree))
-{
-  match tree {
-    case Leaf => // N/A
-    case Node(left, x, right) => Lemma_SortedConcatWithMiddleElement(BST_InOrder(left), x, BST_InOrder(right));
   }
 }
 
@@ -115,11 +105,59 @@ predicate bst_high_bound(tree:BST<T>, d:T)
 {
   match tree {
     case Leaf => true
-    case Node(left, x, right) => d > x && bst_high_bound(left, d) && bst_high_bound(right, d)
+    case Node(left, x, right) => d >= x && bst_high_bound(left, d) && bst_high_bound(right, d)
   }
 }
 
 // ------------------------ Lemmas ------------------------ //
+
+lemma {:induction tree} Lemma_InsertOrdered(tree:BST<T>, d:T)
+  requires bst_is_ordered(tree)
+  ensures bst_is_ordered(BST_Insert(tree, d))
+{
+  match tree {
+    case Leaf =>
+      calc == {
+        bst_is_ordered(BST_Insert(tree, d));
+          { assert tree == Leaf; }
+        bst_is_ordered(BST_Insert(Leaf, d));
+          { assert BST_Insert(Leaf, d) == Node(Leaf, d, Leaf); }
+        bst_is_ordered(Node(Leaf, d, Leaf));
+        true;
+      }
+    case Node(left, x, right) =>
+      calc == {
+        bst_is_ordered(BST_Insert(tree, d));
+          { assert tree == Node(left, x, right); }
+        bst_is_ordered(BST_Insert(Node(left, x, right), d));
+        { if d < x {
+          calc == {
+            bst_is_ordered(BST_Insert(left, d));
+              { Lemma_InsertOrdered(left, d); }
+          }
+        } else {
+          calc == {
+            bst_is_ordered(BST_Insert(right, d));
+              { Lemma_InsertOrdered(right, d); }
+          }
+        } }
+        bst_is_ordered(BST_Insert(Leaf, d));
+          { assert BST_Insert(Leaf, d) == Node(Leaf, d, Leaf); }
+        bst_is_ordered(Node(Leaf, d, Leaf));
+        true;
+      }
+  }
+}
+
+lemma {:induction tree} Lemma_BSTInOrderListIsOrdered(tree:BST<T>)
+  requires bst_is_ordered(tree)
+  ensures list_is_ordered(BST_InOrder(tree))
+{
+  match tree {
+    case Leaf =>
+    case Node(left, x, right) => { Lemma_SortedConcatWithMiddleElement(BST_InOrder(left), x, BST_InOrder(right)); } // Falla en comprobar list_low_bound y list_high_bound
+  }
+}
 
 lemma {:induction tree} Lemma_BSTSameElementsThanInOrder(tree:BST<T>)
   requires bst_is_ordered(tree)
