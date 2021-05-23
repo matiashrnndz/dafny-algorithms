@@ -25,7 +25,7 @@ function method BST_Size(tree:BST<T>) : (n:int)
 function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
   decreases tree
   requires bst_is_ordered(tree)
-  // Ensures que Result esté ordenado
+  // ensures bst_is_ordered (result)
 {
   match tree {
     case Leaf => Node(Leaf, d, Leaf)
@@ -39,9 +39,8 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
 function method BST_InOrder(tree:BST<T>) : (result:List<T>)
   decreases tree
   requires bst_is_ordered(tree)
-  ensures BST_InOrder(tree) == result
-  // Ensures que Result esté ordenado
-  // Ensures que el tree tenga los mismos elementos que el result
+  ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
+  ensures list_is_ordered(BST_InOrder(tree))
 {
   match tree {
     case Leaf => List_Empty
@@ -49,25 +48,27 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
   }
 }
 
-function method BST_ToSeq(tree:BST<T>) : seq<T>
-  decreases tree
+lemma {:induction tree} Lemma_IfBSTIsOrderedThenInOrderListIsOrdered(tree:BST<T>)
+  requires bst_is_ordered(tree)
+  ensures list_is_ordered(BST_InOrder(tree))
 {
   match tree {
-    case Leaf => []
-    case Node(left, x, right) => BST_ToSeq(left) + [x] + BST_ToSeq(right)
+    case Leaf => // N/A
+    case Node(left, x, right) => Lemma_SortedConcatWithMiddleElement(BST_InOrder(left), x, BST_InOrder(right));
   }
 }
 
-function method BST_ToSet(tree:BST<T>) : set<T>
+function method BST_ToMultiset(tree:BST<T>) : multiset<T>
   decreases tree
 {
   match tree {
-    case Leaf => {}
-    case Node(left, x, right) => BST_ToSet(left) + {x} + BST_ToSet(right)
+    case Leaf => multiset{}
+    case Node(left, x, right) => multiset{x} + BST_ToMultiset(left) + BST_ToMultiset(right)
   }
 }
 
 function method BST_Contains(tree:BST<T>, d:T) : bool
+  requires bst_is_ordered(tree)
   decreases tree
 {
   match tree {
@@ -85,7 +86,6 @@ function method BST_Mirror(tree:BST<T>) : BST<T>
   }
 }
 
-
 // ---------------------- Predicates ---------------------- //
 
 predicate bst_is_ordered(tree:BST<T>)
@@ -96,40 +96,71 @@ predicate bst_is_ordered(tree:BST<T>)
     case Node(left, x, right) => 
       bst_is_ordered(left) &&
       bst_is_ordered(right) &&
-      (forall y :: y in BST_ToSet(left) ==> y < x) &&
-      (forall y :: y in BST_ToSet(right) ==> y >= x)
+      bst_high_bound(left, x) &&
+      bst_low_bound(right, x)
+  }
+}
+
+predicate bst_low_bound(tree:BST<T>, d:T)
+  decreases tree
+{
+  match tree {
+    case Leaf => true
+    case Node(left, x, right) => d <= x && bst_low_bound(left, d) && bst_low_bound(right, d)
+  }
+}
+
+predicate bst_high_bound(tree:BST<T>, d:T)
+  decreases tree
+{
+  match tree {
+    case Leaf => true
+    case Node(left, x, right) => d > x && bst_high_bound(left, d) && bst_high_bound(right, d)
   }
 }
 
 // ------------------------ Lemmas ------------------------ //
 
-/*
-lemma {:induction false} InOrderElemsSameThanTreeElemsLemma(tree:BST<T>, result:List<T>)
-  ensures List_ToSeq(BST_InOrder(tree)) == List_ToSeq(result)
+lemma {:induction tree} Lemma_BSTSameElementsThanInOrder(tree:BST<T>)
+  requires bst_is_ordered(tree)
+  ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
+  decreases tree
 {
   match tree {
     case Leaf =>
       calc == {
-        List_ToSeq(BST_InOrder(tree));
-          { assert BST_InOrder(tree) == List_Empty; }
-        List_ToSeq(List_Empty);
-          { assert List_Empty == result; }
-        List_ToSeq(result);
+        BST_ToMultiset(tree);
+          { assert tree == Leaf; }
+        BST_ToMultiset(Leaf);
+          { assert BST_ToMultiset(Leaf) == multiset{}; }
+        multiset{};
+          { assert multiset{} == List_ToMultiset(List_Empty); }
+        List_ToMultiset(List_Empty);
+          { assert List_Empty == BST_InOrder(Leaf); }
+        List_ToMultiset(BST_InOrder(Leaf));
+          { assert Leaf == tree; }
+        List_ToMultiset(BST_InOrder(tree));
       }
     case Node(left, x, right) =>
       calc == {
-        List_ToSeq(BST_InOrder(tree));
-          { assert List_ToSeq(BST_InOrder(tree)) == List_ToSeq(List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right)))); }
-        List_ToSeq(List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right))));
-          { assert List_ToSeq(List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right)))) == List_ToSeq(BST_InOrder(left)) + List_ToSeq(List_Concat(Cons(x, List_Empty), BST_InOrder(right))); }
-        List_ToSeq(BST_InOrder(left)) + List_ToSeq(List_Concat(Cons(x, List_Empty), BST_InOrder(right)));
-          { assert List_ToSeq(List_Concat(Cons(x, List_Empty), BST_InOrder(right))) == List_ToSeq(Cons(x, List_Empty)) + List_ToSeq(BST_InOrder(right)); }
-        List_ToSeq(BST_InOrder(left)) + List_ToSeq(Cons(x, List_Empty)) + List_ToSeq(BST_InOrder(right));
-          { assert List_ToSeq(BST_InOrder(left)) + List_ToSeq(Cons(x, List_Empty)) + List_ToSeq(BST_InOrder(right)) == List_ToSeq(BST_InOrder(left)) + [x] + List_ToSeq(BST_InOrder(right)); }
-        List_ToSeq(BST_InOrder(left)) + [x] + List_ToSeq(BST_InOrder(right));
-          { InOrderElemsSameThanTreeElemsLemma(left, result); }
-          { InOrderElemsSameThanTreeElemsLemma(right, result); }
+        List_ToMultiset(BST_InOrder(tree));
+          { assert List_ToMultiset(BST_InOrder(tree)) == List_ToMultiset(BST_InOrder(Node(left, x, right))); }
+        List_ToMultiset(BST_InOrder(Node(left, x, right)));
+          { assert List_ToMultiset(BST_InOrder(Node(left, x, right))) == List_ToMultiset(List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right)))); }
+        List_ToMultiset(List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right))));
+          { assert List_ToMultiset(List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right)))) == List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(List_Concat(Cons(x, List_Empty), BST_InOrder(right))); }
+        List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(List_Concat(Cons(x, List_Empty), BST_InOrder(right)));
+          { assert List_ToMultiset(List_Concat(Cons(x, List_Empty), BST_InOrder(right))) == List_ToMultiset(Cons(x, List_Empty)) + List_ToMultiset(BST_InOrder(right)); }
+        List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, List_Empty)) + List_ToMultiset(BST_InOrder(right));
+          { assert List_ToMultiset(Cons(x, List_Empty)) == multiset{x} + List_ToMultiset(List_Empty); }
+        List_ToMultiset(BST_InOrder(left)) + multiset{x} + List_ToMultiset(List_Empty) + List_ToMultiset(BST_InOrder(right));
+          { assert List_ToMultiset(List_Empty) == multiset{}; }
+        List_ToMultiset(BST_InOrder(left)) + multiset{x} + multiset{} + List_ToMultiset(BST_InOrder(right));
+          { assert multiset{x} + multiset{} == multiset{x}; }
+        List_ToMultiset(BST_InOrder(left)) + multiset{x} + List_ToMultiset(BST_InOrder(right));
+          { Lemma_BSTSameElementsThanInOrder(left); }
+          { Lemma_BSTSameElementsThanInOrder(right); }
+        BST_ToMultiset(tree);
       }
   }
 }
-*/

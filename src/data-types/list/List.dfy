@@ -14,7 +14,7 @@ function List_Init(): List<T>
 
 // ---------------------- Function Methods ---------------------- //
 
-function method {:tailrecursion true} List_Size(list:List<T>) : int
+function method List_Size(list:List<T>) : int
   decreases list
 {
   match list {
@@ -34,12 +34,12 @@ function method List_Insert(list:List<T>, x:T) : List<T>
 
 function method List_Concat(a:List<T>, b:List<T>) : List<T>
   decreases a
-  ensures List_ToSeq(List_Concat(a, b)) == List_ToSeq(a) + List_ToSeq(b)
+  ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
   ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
 {
   match a {
     case List_Empty => b
-    case Cons(head, tail) =>  Cons(head, List_Concat(tail, b))
+    case Cons(head, tail) => Cons(head, List_Concat(tail, b))
   }
 }
 
@@ -67,9 +67,18 @@ function List_Contains(list:List<T>, x:T) : bool
   }
 }
 
+function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
+  decreases list
+{
+  match list {
+    case List_Empty => multiset{}
+    case Cons(head, tail) => multiset{head} + List_ToMultiset(tail)
+  }
+}
+
 // ------------------------- Methods -------------------------- //
 
-method {:tailrecursion true} List_Print(list:List<T>) 
+method List_Print(list:List<T>) 
   decreases list
 {
   match list {
@@ -87,65 +96,124 @@ method {:tailrecursion true} List_Print(list:List<T>)
   }
 }
 
-function method List_ToSeq(list:List<T>) : (s:seq<T>)
-  // Ensures que tengan los mismos elementos la lista y la seq
-  decreases list
-{
-  match list {
-    case List_Empty => []
-    case Cons(head, tail) => [head] + List_ToSeq(tail)
-  }
-}
-
-function method List_ToSet(list:List<T>) : (s:set<T>)
-  // Ensures que tengan los mismos elementos la lista y el set
-  decreases list
-{
-  match list {
-    case List_Empty => {}
-    case Cons(head, tail) => {head} + List_ToSet(tail)
-  }
-}
-
 // ---------------------- Predicates ---------------------- //
 
-predicate list_ascending_order(list:List<T>) 
+predicate list_low_bound(list:List<T>, d:T)
+  decreases list
+{
+  match list {
+    case List_Empty => true
+    case Cons(h, tail) => (d <= h) && list_low_bound(tail, d)
+  }
+}
+
+predicate list_high_bound(list:List<T>, d:T)
+  decreases list
+{
+  match list {
+    case Leaf => true
+    case Cons(h, tail) => (d >= h) && list_high_bound(tail, h)
+  }
+}
+
+predicate list_is_ordered(list:List<T>)
   decreases list
 {
   match list {
     case List_Empty => true
     case Cons(head, List_Empty) => true
-    case Cons(head, Cons(ht, tail)) => head <= ht && list_ascending_order(tail)
+    case Cons(head, Cons(ht, tail)) => head <= ht && list_is_ordered(Cons(ht, tail))
   }
 }
 
 // ------------------------ Lemmas ------------------------ //
 
-lemma {:induction false} Lemma_ConcatElems(a:List<T>, b:List<T>)
-  ensures List_ToSeq(List_Concat(a, b)) == List_ToSeq(a) + List_ToSeq(b)
+lemma {:induction a, b} Lemma_ConcatOfEmptyLists(a:List<T>, b:List<T>)
+  requires a == List_Empty
+  requires b == List_Empty
+  ensures List_Concat(a, b) == List_Empty
+{
+  calc == {
+    List_Concat(a, b);
+      { assert a == List_Empty; }
+    List_Concat(List_Empty, b);
+      { assert List_Concat(List_Empty, b) == b; }
+    b;
+      { assert b == List_Empty; }
+    List_Empty;
+  }
+}
+
+lemma {:induction a, b} Lemma_SortedConcat(a:List<T>, b:List<T>)
+  requires list_is_ordered(a)
+  requires list_is_ordered(b)
+  ensures list_is_ordered(List_Concat(a, b))
   decreases a, b
 {
   match a {
     case List_Empty =>
       calc == {
-        List_ToSeq(List_Concat(a, b));
-          { assert List_ToSeq(a) + List_ToSeq(b) == List_ToSeq(b); }
-        [] + List_ToSeq(b);
-          { assert List_ToSeq(a) == []; }
-        List_ToSeq(a) + List_ToSeq(b);
+        list_is_ordered(List_Concat(a, b));
+          { assert List_Concat(a, b) == b; }
+        list_is_ordered(b);
+          { assert list_is_ordered(b); }
+        true;
       }
     case Cons(ha, ta) =>
       calc == {
-        List_ToSeq(List_Concat(a, b));
-          { assert List_ToSeq(List_Concat(a, b)) == List_ToSeq(Cons(ha, List_Empty)) + List_ToSeq(List_Concat(ta, b)); }
-        List_ToSeq(Cons(ha, List_Empty)) + List_ToSeq(List_Concat(ta, b));
-          { Lemma_ConcatElems(ta, b); }
-        List_ToSeq(a) + List_ToSeq(b);
+        list_is_ordered(List_Concat(a, b));
+          { assert a == Cons(ha, ta); }
+        list_is_ordered(List_Concat(Cons(ha, ta), b));
+          { assert List_Concat(Cons(ha, ta), b) == Cons(ha, List_Concat(ta, b)); }
+        list_is_ordered(Cons(ha, List_Concat(ta, b)));
+        // TODO
+        true;
       }
   }
 }
 
-lemma {:induction false} Lemma_ConcatSize(a:List<T>, b:List<T>)
+lemma {:induction a, b} Lemma_SortedConcatWithMiddleElement(a:List<T>, x:T, b:List<T>)
+  requires list_is_ordered(a) && list_high_bound(a, x)
+  requires list_low_bound(b, x) && list_is_ordered(b)
+  ensures list_is_ordered(List_Concat(a, List_Concat(Cons(x, List_Empty), b)))
+  decreases a, b
+{
+  calc == {
+    list_is_ordered(List_Concat(a, List_Concat(Cons(x, List_Empty), b)));
+      { assert List_Concat(Cons(x, List_Empty), b) == Cons(x, List_Concat(List_Empty, b)); }
+    list_is_ordered(List_Concat(a, Cons(x, List_Concat(List_Empty, b))));
+      { assert List_Concat(List_Empty, b) == b; }
+    list_is_ordered(List_Concat(a, Cons(x, b)));
+      { Lemma_SortedConcat(a, Cons(x, b)); }
+    true;
+  }
+}
+
+lemma {:induction a} Lemma_ConcatElems(a:List<T>, b:List<T>)
+  ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
+  decreases a, b
+{
+  match a {
+    case List_Empty =>
+      calc == {
+        List_ToMultiset(List_Concat(a, b));
+          { assert List_ToMultiset(a) + List_ToMultiset(b) == List_ToMultiset(b); }
+        multiset{} + List_ToMultiset(b);
+          { assert List_ToMultiset(a) == multiset{}; }
+        List_ToMultiset(a) + List_ToMultiset(b);
+      }
+    case Cons(ha, ta) =>
+      calc == {
+        List_ToMultiset(List_Concat(a, b));
+          { assert List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(Cons(ha, List_Empty)) + List_ToMultiset(List_Concat(ta, b)); }
+        List_ToMultiset(Cons(ha, List_Empty)) + List_ToMultiset(List_Concat(ta, b));
+          { Lemma_ConcatElems(ta, b); }
+        List_ToMultiset(a) + List_ToMultiset(b);
+      }
+  }
+}
+
+lemma {:induction a} Lemma_ConcatSize(a:List<T>, b:List<T>)
   ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
   decreases a, b
 {
@@ -168,3 +236,32 @@ lemma {:induction false} Lemma_ConcatSize(a:List<T>, b:List<T>)
       }
   }
 }
+
+  /*
+  match a {
+    case List_Empty =>
+      calc == {
+        list_is_ordered(List_Concat(a, List_Concat(Cons(x, List_Empty), b)));
+          { assert a == List_Empty; }
+        list_is_ordered(List_Concat(List_Empty, List_Concat(Cons(x, List_Empty), List_Empty)));
+          { assert List_Concat(List_Empty, List_Concat(Cons(x, List_Empty), b)) == List_Concat(Cons(x, List_Empty), b); }
+        list_is_ordered(List_Concat(Cons(x, List_Empty), b));
+          { assert List_Concat(Cons(x, List_Empty), b) == Cons(x, List_Concat(List_Empty, b)); }
+        list_is_ordered(Cons(x, List_Concat(List_Empty, b)));
+          { assert List_Concat(List_Empty, b) == b; }
+        list_is_ordered(Cons(x, b));
+          { assert list_low_bound(b, x) && list_is_ordered(b); }
+        true;
+      }
+    case Cons(ha, ta) =>
+      calc == {
+        list_is_ordered(List_Concat(a, List_Concat(Cons(x, List_Empty), b)));
+          { assert List_Concat(Cons(x, List_Empty), b) == Cons(x, List_Concat(List_Empty, b)); }
+        list_is_ordered(List_Concat(a, Cons(x, List_Concat(List_Empty, b))));
+          { assert List_Concat(List_Empty, b) == b; }
+        list_is_ordered(List_Concat(a, Cons(x, b)));
+          { Lemma_SortedConcat(a, Cons(x, b)); }
+        true;
+      }
+  }
+  */
