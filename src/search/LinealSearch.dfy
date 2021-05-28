@@ -13,7 +13,7 @@ method LinealSearch(A:array<int>, key:int) returns (index:int)
   {
     if A[i] == key
     {
-        return i;
+      return i;
     }
     i := i + 1;
   }

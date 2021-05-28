@@ -23,28 +23,28 @@ function method BST_Size(tree:BST<T>) : (n:int)
 }
 
 function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
-  decreases tree
   requires bst_is_ordered(tree)
-  ensures bst_is_ordered(result)
+  // ensures bst_is_ordered(result) // Postcondition that might not hold
+  decreases tree
 {
   match tree {
     case Leaf => Node(Leaf, d, Leaf)
     case Node(left, x, right) => 
       if (d < x)
-        then BST_Insert(left, d)
-        else BST_Insert(right, d)
+        then Node(BST_Insert(left, d), x , right)
+      else Node(left, x, BST_Insert(right, d))
   }
 }
 
 function method BST_InOrder(tree:BST<T>) : (result:List<T>)
   requires bst_is_ordered(tree)
   ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
-  ensures list_is_ordered(BST_InOrder(tree)) // Postcondition that might not hold
+  //ensures list_is_ordered(result) // Postcondition that might not hold
   decreases tree
 {
   match tree {
     case Leaf => List_Empty
-    case Node(left, x, right) => List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right)))
+    case Node(left, x, right) => List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))
   }
 }
 
@@ -110,7 +110,25 @@ predicate bst_high_bound(tree:BST<T>, d:T)
 }
 
 // ------------------------ Lemmas ------------------------ //
+/*
+lemma Lemma_InsertHighBound(tree:BST<T>, d:T, x:T)
+  requires bst_high_bound(tree, x)
+  requires d < x
+  ensures bst_high_bound(BST_Insert(tree, d), x)
+{
 
+}
+
+lemma Lemma_InsertLowBound(tree:BST<T>, d:T, x:T)
+  requires bst_low_bound(tree, x)
+  requires d >= x
+  ensures bst_low_bound(BST_Insert(tree, d), x)
+{
+
+}
+*/
+
+/*
 lemma {:induction tree} Lemma_InsertOrdered(tree:BST<T>, d:T)
   requires bst_is_ordered(tree)
   ensures bst_is_ordered(BST_Insert(tree, d))
@@ -135,11 +153,13 @@ lemma {:induction tree} Lemma_InsertOrdered(tree:BST<T>, d:T)
           calc == {
             bst_is_ordered(BST_Insert(left, d));
               { Lemma_InsertOrdered(left, d); }
+              //{ Lemma_InsertHighBound(left, d, x); }
           }
         } else {
           calc == {
             bst_is_ordered(BST_Insert(right, d));
               { Lemma_InsertOrdered(right, d); }
+              //{ Lemma_InsertLowBound(right, d, x); }
           }
         } }
         bst_is_ordered(BST_Insert(Leaf, d));
@@ -149,6 +169,7 @@ lemma {:induction tree} Lemma_InsertOrdered(tree:BST<T>, d:T)
       }
   }
 }
+*/
 
 lemma {:induction tree} Lemma_BSTSameElementsThanInOrder(tree:BST<T>)
   requires bst_is_ordered(tree)
@@ -175,11 +196,11 @@ lemma {:induction tree} Lemma_BSTSameElementsThanInOrder(tree:BST<T>)
         List_ToMultiset(BST_InOrder(tree));
           { assert List_ToMultiset(BST_InOrder(tree)) == List_ToMultiset(BST_InOrder(Node(left, x, right))); }
         List_ToMultiset(BST_InOrder(Node(left, x, right)));
-          { assert List_ToMultiset(BST_InOrder(Node(left, x, right))) == List_ToMultiset(List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right)))); }
-        List_ToMultiset(List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right))));
-          { assert List_ToMultiset(List_Concat(BST_InOrder(left), List_Concat(Cons(x, List_Empty), BST_InOrder(right)))) == List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(List_Concat(Cons(x, List_Empty), BST_InOrder(right))); }
-        List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(List_Concat(Cons(x, List_Empty), BST_InOrder(right)));
-          { assert List_ToMultiset(List_Concat(Cons(x, List_Empty), BST_InOrder(right))) == List_ToMultiset(Cons(x, List_Empty)) + List_ToMultiset(BST_InOrder(right)); }
+          { assert List_ToMultiset(BST_InOrder(Node(left, x, right))) == List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))); }
+        List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
+          { assert List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))) == List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, BST_InOrder(right))); }
+        List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, BST_InOrder(right)));
+          { assert List_ToMultiset(Cons(x, BST_InOrder(right))) == List_ToMultiset(Cons(x, List_Empty)) + List_ToMultiset(BST_InOrder(right)); }
         List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, List_Empty)) + List_ToMultiset(BST_InOrder(right));
           { assert List_ToMultiset(Cons(x, List_Empty)) == multiset{x} + List_ToMultiset(List_Empty); }
         List_ToMultiset(BST_InOrder(left)) + multiset{x} + List_ToMultiset(List_Empty) + List_ToMultiset(BST_InOrder(right));
@@ -190,6 +211,37 @@ lemma {:induction tree} Lemma_BSTSameElementsThanInOrder(tree:BST<T>)
           { Lemma_BSTSameElementsThanInOrder(left); }
           { Lemma_BSTSameElementsThanInOrder(right); }
         BST_ToMultiset(tree);
+      }
+  }
+}
+
+lemma {:induction tree} Lemma_BSTOrderedThenInOrderOrdered(tree:BST<T>)
+  requires bst_is_ordered(tree)
+  ensures list_is_ordered(BST_InOrder(tree))
+{
+  match tree {
+    case Leaf =>
+      calc == {
+        list_is_ordered(BST_InOrder(tree));
+          { assert tree == Leaf; }
+        list_is_ordered(BST_InOrder(Leaf));
+          { assert BST_InOrder(Leaf) == List_Empty; }
+        list_is_ordered(List_Empty);
+        true;
+      }
+    case Node(left, x, right) =>
+      calc == {
+        list_is_ordered(BST_InOrder(tree));
+          { assert tree == Node(left, x, right); }
+        list_is_ordered(BST_InOrder(Node(left, x, right)));
+          { assert BST_InOrder(Node(left, x, right)) ==  List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
+        list_is_ordered(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
+          { assert bst_low_bound(right, x); }
+          { Lemma_BSTLowBoundThenInOrderLowBound(right, x); }
+          { assert bst_high_bound(left, x); }
+          { Lemma_BSTHighBoundThenInOrderHighBound(left, x); }
+          { Lemma_ConcatSortedWithMiddleElement(BST_InOrder(left), x, BST_InOrder(right)); }
+        true;
       }
   }
 }
@@ -212,56 +264,67 @@ lemma {:induction tree} Lemma_BSTHighBoundThenInOrderHighBound(tree:BST<T>, d:T)
       case Node(left, x, right) =>
         calc == {
           list_high_bound(BST_InOrder(tree), d);
-          
+            { assert tree == Node(left, x, right); }
+          list_high_bound(BST_InOrder(Node(left, x, right)), d);
+            { assert BST_InOrder(Node(left, x, right)) == List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
+          list_high_bound(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))), d);
+            { assert list_high_bound(BST_InOrder(left), d); }
+            { assert list_high_bound(BST_InOrder(right), d); }
+            { assert d >= x; }
+            { Lemma_IfElemHighBoundOfTwoListsThenIsHighBoundOfConcat(BST_InOrder(left), BST_InOrder(right), d, x); }
           true;
         }
   }
 }
 
-
-lemma {:induction list} xd(list:List<T>, d:T)
-  requires list_high_bound(List_Max(list), d)
-  ensures list_high_bound(List_Max(list), d) == list_high_bound(list, d)
-{
-  match list {
-    case List_Empty =>
-      calc == {
-
-      }
-    case Cons(head, tail) =>
-      calc == {
-        
-      }
-  }
-}
-
-/*
-lemma {:induction tree} Lemma_BSTInOrderListIsOrdered(tree:BST<T>)
+lemma {:induction tree} Lemma_BSTLowBoundThenInOrderLowBound(tree:BST<T>, d:T)
   requires bst_is_ordered(tree)
-  ensures list_is_ordered(BST_InOrder(tree))
+  requires bst_low_bound(tree, d)
+  ensures list_low_bound(BST_InOrder(tree), d)
 {
   match tree {
     case Leaf =>
       calc == {
-        list_is_ordered(BST_InOrder(tree));
+        list_low_bound(BST_InOrder(tree), d);
           { assert tree == Leaf; }
-        list_is_ordered(BST_InOrder(Leaf));
+        list_low_bound(BST_InOrder(Leaf), d);
           { assert BST_InOrder(Leaf) == List_Empty; }
-        list_is_ordered(List_Empty);
+        list_low_bound(List_Empty, d);
         true;
       }
-    case Node(left, x, right) =>
-      calc == {
-        list_is_ordered(BST_InOrder(tree));
-          { assert tree == Node(left, x, right); }
-        list_is_ordered(BST_InOrder(Node(left, x, right)));
-          { assert bst_high_bound(left, x); }
-          { assert list_high_bound(BST_InOrder(left), x); }
-          { assert bst_low_bound(right, x); }
-          { assert list_low_bound(BST_InOrder(right), x); }
-          { Lemma_SortedConcatWithMiddleElement(BST_InOrder(left), x, BST_InOrder(right)); } // Falla en comprobar list_low_bound y list_high_bound
-        true;
-      }
+      case Node(left, x, right) =>
+        calc == {
+          list_low_bound(BST_InOrder(tree), d);
+            { assert tree == Node(left, x, right); }
+          list_low_bound(BST_InOrder(Node(left, x, right)), d);
+            { assert BST_InOrder(Node(left, x, right)) == List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
+          list_low_bound(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))), d);
+            { assert list_low_bound(BST_InOrder(left), d); }
+            { assert list_low_bound(BST_InOrder(right), d); }
+            { assert d <= x; }
+            { Lemma_IfElemLowBoundOfTwoListsThenIsLowBoundOfConcat(BST_InOrder(left), BST_InOrder(right), d, x); }
+          true;
+        }
   }
+}
+
+/*
+function method BST_Load(list:List<T>): (result:BST<T>)
+  ensures bst_is_ordered(result)
+  ensures BST_ToMultiset(result) == List_ToMultiset(input)
+{
+
+}
+
+lemma Lemma_MultisetLoadSameElementsThanList(input:List<T>)
+  ensures BST_ToMultiset(BST_Load(input)) == List_ToMultiset(input)
+{
+
+}
+
+lemma Lemma_LoadOrdered(input:List<T>)
+  ensures bst_is_ordered(BST_Load(input))
+{
+
 }
 */
