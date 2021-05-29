@@ -24,7 +24,7 @@ function method BST_Size(tree:BST<T>) : (n:int)
 
 function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
   requires bst_is_ordered(tree)
-  // ensures bst_is_ordered(result) // Postcondition that might not hold
+  ensures bst_is_ordered(BST_Insert(tree, d)) // Postcondition that might not hold
   decreases tree
 {
   match tree {
@@ -39,7 +39,7 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
 function method BST_InOrder(tree:BST<T>) : (result:List<T>)
   requires bst_is_ordered(tree)
   ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
-  //ensures list_is_ordered(result) // Postcondition that might not hold
+  ensures list_is_ordered(BST_InOrder(tree)) // Postcondition that might not hold
   decreases tree
 {
   match tree {
@@ -86,49 +86,31 @@ predicate bst_is_ordered(tree:BST<T>)
     case Node(left, x, right) => 
       bst_is_ordered(left) &&
       bst_is_ordered(right) &&
-      bst_high_bound(left, x) &&
-      bst_low_bound(right, x)
+      bst_upper_bound(left, x) &&
+      bst_lower_bound(right, x)
   }
 }
 
-predicate bst_low_bound(tree:BST<T>, d:T)
+predicate bst_lower_bound(tree:BST<T>, d:T)
   decreases tree
 {
   match tree {
     case Leaf => true
-    case Node(left, x, right) => d <= x && bst_low_bound(left, d) && bst_low_bound(right, d)
+    case Node(left, x, right) => d <= x && bst_lower_bound(left, d) && bst_lower_bound(right, d)
   }
 }
 
-predicate bst_high_bound(tree:BST<T>, d:T)
+predicate bst_upper_bound(tree:BST<T>, d:T)
   decreases tree
 {
   match tree {
     case Leaf => true
-    case Node(left, x, right) => d >= x && bst_high_bound(left, d) && bst_high_bound(right, d)
+    case Node(left, x, right) => d >= x && bst_upper_bound(left, d) && bst_upper_bound(right, d)
   }
 }
 
 // ------------------------ Lemmas ------------------------ //
-/*
-lemma Lemma_InsertHighBound(tree:BST<T>, d:T, x:T)
-  requires bst_high_bound(tree, x)
-  requires d < x
-  ensures bst_high_bound(BST_Insert(tree, d), x)
-{
 
-}
-
-lemma Lemma_InsertLowBound(tree:BST<T>, d:T, x:T)
-  requires bst_low_bound(tree, x)
-  requires d >= x
-  ensures bst_low_bound(BST_Insert(tree, d), x)
-{
-
-}
-*/
-
-/*
 lemma {:induction tree} Lemma_InsertOrdered(tree:BST<T>, d:T)
   requires bst_is_ordered(tree)
   ensures bst_is_ordered(BST_Insert(tree, d))
@@ -149,27 +131,99 @@ lemma {:induction tree} Lemma_InsertOrdered(tree:BST<T>, d:T)
         bst_is_ordered(BST_Insert(tree, d));
           { assert tree == Node(left, x, right); }
         bst_is_ordered(BST_Insert(Node(left, x, right), d));
-        { if d < x {
+        { if (d < x) {
           calc == {
-            bst_is_ordered(BST_Insert(left, d));
+            bst_is_ordered(Node(BST_Insert(left, d), x, right));
+              { Lemma_InsertUpperBound(left, d, x); }
+              { assert bst_upper_bound(BST_Insert(left, d), x); }
               { Lemma_InsertOrdered(left, d); }
-              //{ Lemma_InsertHighBound(left, d, x); }
+            bst_is_ordered(Node(Leaf, d, Leaf));
           }
         } else {
           calc == {
-            bst_is_ordered(BST_Insert(right, d));
+            bst_is_ordered(Node(left, x, BST_Insert(right, d)));
+              { Lemma_InsertLowerBound(right, d, x); }
+              { assert bst_lower_bound(BST_Insert(right, d), x); }
               { Lemma_InsertOrdered(right, d); }
-              //{ Lemma_InsertLowBound(right, d, x); }
+            bst_is_ordered(Node(Leaf, d, Leaf));
           }
         } }
-        bst_is_ordered(BST_Insert(Leaf, d));
-          { assert BST_Insert(Leaf, d) == Node(Leaf, d, Leaf); }
-        bst_is_ordered(Node(Leaf, d, Leaf));
         true;
       }
   }
 }
-*/
+
+lemma {:induction tree} Lemma_InsertUpperBound(tree:BST<T>, d:T, b:T)
+  requires bst_is_ordered(tree)
+  requires bst_upper_bound(tree, b)
+  requires b > d
+  ensures bst_upper_bound(BST_Insert(tree, d), b)
+  decreases tree
+{
+  match tree {
+    case Leaf =>
+      calc == {
+        bst_upper_bound(BST_Insert(tree, d), b);
+          { assert tree == Leaf; }
+        bst_upper_bound(BST_Insert(Leaf, d), b);
+          { assert bst_upper_bound(BST_Insert(Leaf, d), b) == bst_upper_bound(Node(Leaf, d, Leaf), b); }
+        bst_upper_bound(Node(Leaf, d, Leaf), b);
+          { assert bst_upper_bound(Node(Leaf, d, Leaf), b) == (b >= d && bst_upper_bound(Leaf, b) && bst_upper_bound(Leaf, b)); }
+        (b >= d && bst_upper_bound(Leaf, b) && bst_upper_bound(Leaf, b));
+          { assert bst_upper_bound(Leaf, b) == true; }
+        (b >= d && true && true);
+          { assert (b >= d && true && true) == (b >= d); }
+        (b >= d);
+          { assert b > d; }
+        true;
+      }
+    case Node(left, x, right) =>
+      calc == {
+        bst_upper_bound(BST_Insert(tree, d), b);
+          { assert tree == Node(left, x, right); }
+        bst_upper_bound(BST_Insert(Node(left, x, right), d), b);
+          { Lemma_InsertUpperBound(left, d, b); }
+          { Lemma_InsertUpperBound(right, d, b); }
+        true;
+      }
+  }
+}
+
+lemma {:induction tree} Lemma_InsertLowerBound(tree:BST<T>, d:T, b:T)
+  requires bst_is_ordered(tree)
+  requires bst_lower_bound(tree, b)
+  requires b <= d
+  ensures bst_lower_bound(BST_Insert(tree, d), b)
+  decreases tree
+{
+  match tree {
+    case Leaf =>
+      calc == {
+        bst_lower_bound(BST_Insert(tree, d), b);
+          { assert tree == Leaf; }
+        bst_lower_bound(BST_Insert(Leaf, d), b);
+          { assert bst_lower_bound(BST_Insert(Leaf, d), b) == bst_lower_bound(Node(Leaf, d, Leaf), b); }
+        bst_lower_bound(Node(Leaf, d, Leaf), b);
+          { assert bst_lower_bound(Node(Leaf, d, Leaf), b) == (b <= d && bst_lower_bound(Leaf, b) && bst_lower_bound(Leaf, b)); }
+        (b <= d && bst_lower_bound(Leaf, b) && bst_lower_bound(Leaf, b));
+          { assert bst_lower_bound(Leaf, b) == true; }
+        (b <= d && true && true);
+          { assert (b <= d && true && true) == (b <= d); }
+        (b <= d);
+          { assert b <= d; }
+        true;
+      }
+    case Node(left, x, right) =>
+      calc == {
+        bst_lower_bound(BST_Insert(tree, d), b);
+          { assert tree == Node(left, x, right); }
+        bst_lower_bound(BST_Insert(Node(left, x, right), d), b);
+          { Lemma_InsertLowerBound(left, d, b); }
+          { Lemma_InsertLowerBound(right, d, b); }
+        true;
+      }
+  }
+}
 
 lemma {:induction tree} Lemma_BSTSameElementsThanInOrder(tree:BST<T>)
   requires bst_is_ordered(tree)
@@ -236,73 +290,73 @@ lemma {:induction tree} Lemma_BSTOrderedThenInOrderOrdered(tree:BST<T>)
         list_is_ordered(BST_InOrder(Node(left, x, right)));
           { assert BST_InOrder(Node(left, x, right)) ==  List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
         list_is_ordered(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
-          { assert bst_low_bound(right, x); }
-          { Lemma_BSTLowBoundThenInOrderLowBound(right, x); }
-          { assert bst_high_bound(left, x); }
-          { Lemma_BSTHighBoundThenInOrderHighBound(left, x); }
+          { assert bst_lower_bound(right, x); }
+          { Lemma_BSTLowerBoundThenInOrderLowerBound(right, x); }
+          { assert bst_upper_bound(left, x); }
+          { Lemma_BSTUpperBoundThenInOrderUpperBound(left, x); }
           { Lemma_ConcatSortedWithMiddleElement(BST_InOrder(left), x, BST_InOrder(right)); }
         true;
       }
   }
 }
 
-lemma {:induction tree} Lemma_BSTHighBoundThenInOrderHighBound(tree:BST<T>, d:T)
+lemma {:induction tree} Lemma_BSTUpperBoundThenInOrderUpperBound(tree:BST<T>, d:T)
   requires bst_is_ordered(tree)
-  requires bst_high_bound(tree, d)
-  ensures list_high_bound(BST_InOrder(tree), d)
+  requires bst_upper_bound(tree, d)
+  ensures list_upper_bound(BST_InOrder(tree), d)
 {
   match tree {
     case Leaf =>
       calc == {
-        list_high_bound(BST_InOrder(tree), d);
+        list_upper_bound(BST_InOrder(tree), d);
           { assert tree == Leaf; }
-        list_high_bound(BST_InOrder(Leaf), d);
+        list_upper_bound(BST_InOrder(Leaf), d);
           { assert BST_InOrder(Leaf) == List_Empty; }
-        list_high_bound(List_Empty, d);
+        list_upper_bound(List_Empty, d);
         true;
       }
       case Node(left, x, right) =>
         calc == {
-          list_high_bound(BST_InOrder(tree), d);
+          list_upper_bound(BST_InOrder(tree), d);
             { assert tree == Node(left, x, right); }
-          list_high_bound(BST_InOrder(Node(left, x, right)), d);
+          list_upper_bound(BST_InOrder(Node(left, x, right)), d);
             { assert BST_InOrder(Node(left, x, right)) == List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
-          list_high_bound(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))), d);
-            { assert list_high_bound(BST_InOrder(left), d); }
-            { assert list_high_bound(BST_InOrder(right), d); }
+          list_upper_bound(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))), d);
+            { assert list_upper_bound(BST_InOrder(left), d); }
+            { assert list_upper_bound(BST_InOrder(right), d); }
             { assert d >= x; }
-            { Lemma_IfElemHighBoundOfTwoListsThenIsHighBoundOfConcat(BST_InOrder(left), BST_InOrder(right), d, x); }
+            { Lemma_IfElemUpperBoundOfTwoListsThenIsUpperBoundOfConcat(BST_InOrder(left), BST_InOrder(right), d, x); }
           true;
         }
   }
 }
 
-lemma {:induction tree} Lemma_BSTLowBoundThenInOrderLowBound(tree:BST<T>, d:T)
+lemma {:induction tree} Lemma_BSTLowerBoundThenInOrderLowerBound(tree:BST<T>, d:T)
   requires bst_is_ordered(tree)
-  requires bst_low_bound(tree, d)
-  ensures list_low_bound(BST_InOrder(tree), d)
+  requires bst_lower_bound(tree, d)
+  ensures list_lower_bound(BST_InOrder(tree), d) == true
 {
   match tree {
     case Leaf =>
       calc == {
-        list_low_bound(BST_InOrder(tree), d);
+        list_lower_bound(BST_InOrder(tree), d);
           { assert tree == Leaf; }
-        list_low_bound(BST_InOrder(Leaf), d);
+        list_lower_bound(BST_InOrder(Leaf), d);
           { assert BST_InOrder(Leaf) == List_Empty; }
-        list_low_bound(List_Empty, d);
+        list_lower_bound(List_Empty, d);
         true;
       }
       case Node(left, x, right) =>
         calc == {
-          list_low_bound(BST_InOrder(tree), d);
+          list_lower_bound(BST_InOrder(tree), d);
             { assert tree == Node(left, x, right); }
-          list_low_bound(BST_InOrder(Node(left, x, right)), d);
+          list_lower_bound(BST_InOrder(Node(left, x, right)), d);
             { assert BST_InOrder(Node(left, x, right)) == List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
-          list_low_bound(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))), d);
-            { assert list_low_bound(BST_InOrder(left), d); }
-            { assert list_low_bound(BST_InOrder(right), d); }
+          list_lower_bound(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))), d);
+            { assert list_lower_bound(BST_InOrder(left), d); }
+            { assert list_lower_bound(BST_InOrder(right), d); }
             { assert d <= x; }
-            { Lemma_IfElemLowBoundOfTwoListsThenIsLowBoundOfConcat(BST_InOrder(left), BST_InOrder(right), d, x); }
+            { Lemma_IfElemLowerBoundOfTwoListsThenIsLowerBoundOfConcat(BST_InOrder(left), BST_InOrder(right), d, x); }
           true;
         }
   }
