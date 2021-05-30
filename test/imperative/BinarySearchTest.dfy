@@ -1,4 +1,4 @@
-include "../../src/search/BinarySearch.dfy"
+include "../../src/imperative/BinarySearch.dfy"
 
 method Main() {
   BinarySearchTest();

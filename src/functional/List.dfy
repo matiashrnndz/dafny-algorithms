@@ -7,7 +7,8 @@ datatype List<T> = List_Empty | Cons(head:T, tail:List<T>)
 
 // ------------------------- Functions -------------------------- //
 
-function List_Init(): List<T>
+function method List_Init(): (list:List<T>)
+  ensures list_is_ordered(list)
 {
   List_Empty
 }
@@ -50,6 +51,21 @@ function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
     case List_Empty => multiset{}
     case Cons(head, tail) => multiset{head} + List_ToMultiset(tail)
   }
+}
+
+function method List_Head(list:List<T>) : (head:T)
+  requires list != List_Empty
+{
+  match list
+    case Cons(head, tail) => head
+}
+
+function method List_Tail(list:List<T>) : (tail:List<T>)
+  ensures if list != List_Empty then List_Size(tail) == List_Size(list) - 1 else List_Size(tail) == 0
+{
+  match list
+    case List_Empty => List_Empty
+    case Cons(head, tail) => tail
 }
 
 // ------------------------- Methods -------------------------- //

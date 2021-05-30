@@ -1,4 +1,4 @@
-include "../../src/sorted.dfy"
+include "../functional/sorted.dfy"
 
 method BinarySearch(A:array<int>, key:int) returns (index:int)
   requires sorted(A)

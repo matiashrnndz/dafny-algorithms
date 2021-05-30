@@ -1,4 +1,4 @@
-include "../../src/sort/TreeSort.dfy"
+include "../../src/imperative/TreeSort.dfy"
 
 method Main() {
   TreeSortTest();

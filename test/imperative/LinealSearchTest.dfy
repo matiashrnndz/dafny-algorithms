@@ -1,4 +1,4 @@
-include "../../src/search/LinealSearch.dfy"
+include "../../src/imperative/LinealSearch.dfy"
 
 method Main() {
   LinealSearchTest();

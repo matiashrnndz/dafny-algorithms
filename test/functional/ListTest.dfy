@@ -1,11 +1,20 @@
-include "../../../src/data-types/list/List.dfy"
+include "../../src/functional/List.dfy"
 
 method Main() {
-  InsertIntoListTest();
-  ConcatTwoListsTest();
+  InitTest();
   SizeZeroTest();
   SizeTest();
-  ElemsTest();
+  InsertIntoListTest();
+  ConcatTwoListsTest();
+  ToMultisetTest();
+  HeadTest();
+  TailTest();
+}
+
+method InitTest() {
+  var list: List<int> := List_Init();
+  assert list_is_ordered(list);
+  assert list == List_Empty;
 }
 
 method InsertIntoListTest() {
@@ -16,7 +25,7 @@ method InsertIntoListTest() {
   list := List_Insert(list, 12);
   list := List_Insert(list, 7);
   var expected := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
-  assert(expected == list);
+  assert expected == list;
 }
 
 method ConcatTwoListsTest() {
@@ -29,26 +38,38 @@ method ConcatTwoListsTest() {
   b := List_Insert(b, 7);
   var c := List_Concat(a, b);
   var expected := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
-  assert(expected == c);
+  assert expected == c;
 }
 
 method SizeZeroTest() {
   var list: List<int> := List_Empty;
   var size := List_Size(list);
   var expected := 0;
-  assert(expected == size);
+  assert expected == size;
 }
 
 method SizeTest() {
   var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
   var size := List_Size(list);
   var expected := 5;
-  assert(expected == size);
+  assert expected == size;
 }
 
-method ElemsTest() {
+method ToMultisetTest() {
   var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
-  var elems: seq<int> := List_ToSeq(list);
-  var expected := [2, 10, 4, 12, 7];
-  assert(expected == elems);
+  var elems: multiset<int> := List_ToMultiset(list);
+  var expected := multiset{2, 10, 4, 12, 7};
+  assert expected == elems;
+}
+
+method HeadTest() {
+  var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
+  var head: int := List_Head(list);
+  assert head == 2;
+}
+
+method TailTest() {
+  var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
+  var tail: List<int> := List_Tail(list);
+  assert tail ==  Cons(10, Cons(4, Cons(12, Cons(7, List_Empty))));
 }
