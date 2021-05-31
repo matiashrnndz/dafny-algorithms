@@ -5,14 +5,6 @@ type T = int
 datatype List_Empty = Nil
 datatype List<T> = List_Empty | Cons(head:T, tail:List<T>)
 
-// ------------------------- Functions -------------------------- //
-
-function method List_Init(): (list:List<T>)
-  ensures list_is_ordered(list)
-{
-  List_Empty
-}
-
 // ---------------------- Function Methods ---------------------- //
 
 function method List_Size(list:List<T>) : nat
@@ -35,8 +27,14 @@ function method List_Insert(list:List<T>, x:T) : List<T>
 
 function method List_Concat(a:List<T>, b:List<T>) : List<T>
   decreases a
-  ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
-  ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
+  // Lemma_ConcatSameElems(a, b) ==> ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
+  // Lemma_ConcatSameSize(a, b) ==> ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
+  // Lemma_ConcatOfEmptyLists(List_Empty, List_Empty) ==> ensures List_Concat(a, b) == List_Empty
+  // Lemma_ConcatFirstListEmpty(List_Empty, b) ==> ensures List_Concat(List_Empty, b) == b
+  // Lemma_ConcatSecondListEmpty(a, List_Empty) ==> ensures List_Concat(a, List_Empty) == a
+  // Lemma_ConcatSortedWithMiddleElement(a, x, b) ==> ensures list_is_ordered(List_Concat(a, Cons(x, b)))
+  // Lemma_IfElemUpperBoundOfTwoListsThenIsUpperBoundOfConcat(a, b, d, x) ==> ensures list_upper_bound(List_Concat(a, Cons(x, b)), d)
+  // Lemma_IfElemLowerBoundOfTwoListsThenIsLowerBoundOfConcat(a, b, d, x) ==> ensures list_lower_bound(List_Concat(a, Cons(x, b)), d)
 {
   match a {
     case List_Empty => b
@@ -61,7 +59,6 @@ function method List_Head(list:List<T>) : (head:T)
 }
 
 function method List_Tail(list:List<T>) : (tail:List<T>)
-  ensures if list != List_Empty then List_Size(tail) == List_Size(list) - 1 else List_Size(tail) == 0
 {
   match list
     case List_Empty => List_Empty

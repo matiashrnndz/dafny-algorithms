@@ -7,12 +7,6 @@ datatype BST<T> = Leaf | Node(left:BST<T>, data:T, right:BST<T>)
 
 // ---------------------- Function Methods ---------------------- //
 
-function method BST_Init() : (tree:BST<T>)
-  ensures bst_is_ordered(tree)
-{
-  Leaf
-}
-
 function method BST_Size(tree:BST<T>) : (n:int)
   decreases tree
 {
@@ -23,8 +17,9 @@ function method BST_Size(tree:BST<T>) : (n:int)
 }
 
 function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
-  requires bst_is_ordered(tree)
-  //ensures bst_is_ordered(BST_Insert(tree, d)) // Postcondition that might not hold
+  // Lemma_InsertOrdered(tree, d) ==> ensures bst_is_ordered(BST_Insert(tree, d))
+  // Lemma_InsertUpperBound(tree, d, b) ==> ensures bst_upper_bound(BST_Insert(tree, d), b)
+  // Lemma_InsertLowerBound(tree, d, b) ==> ensures bst_lower_bound(BST_Insert(tree, d), b)
   decreases tree
 {
   match tree {
@@ -38,9 +33,10 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
 }
 
 function method BST_InOrder(tree:BST<T>) : (result:List<T>)
-  requires bst_is_ordered(tree)
-  ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
-  //ensures list_is_ordered(BST_InOrder(tree)) // Postcondition that might not hold
+  // Lemma_BSTSameElementsThanInOrder(tree) ==> ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
+  // Lemma_BSTOrderedThenInOrderOrdered(tree) ==> ensures list_is_ordered(BST_InOrder(tree))
+  // Lemma_BSTUpperBoundThenInOrderUpperBound(tree, d) ==> ensures list_upper_bound(BST_InOrder(tree), d)
+  // Lemma_BSTLowerBoundThenInOrderLowerBound(tree, d) ==> ensures list_lower_bound(BST_InOrder(tree), d)
   decreases tree
 {
   match tree {
@@ -59,7 +55,6 @@ function method BST_ToMultiset(tree:BST<T>) : multiset<T>
 }
 
 function method BST_Contains(tree:BST<T>, d:T) : bool
-  requires bst_is_ordered(tree)
   decreases tree
 {
   match tree {
@@ -253,6 +248,7 @@ lemma {:induction tree} Lemma_BSTSameElementsThanInOrder(tree:BST<T>)
         List_ToMultiset(BST_InOrder(Node(left, x, right)));
           { assert List_ToMultiset(BST_InOrder(Node(left, x, right))) == List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))); }
         List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
+          { Lemma_ConcatSameElems(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
           { assert List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))) == List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, BST_InOrder(right))); }
         List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, BST_InOrder(right)));
           { assert List_ToMultiset(Cons(x, BST_InOrder(right))) == List_ToMultiset(Cons(x, List_Empty)) + List_ToMultiset(BST_InOrder(right)); }
@@ -335,7 +331,7 @@ lemma {:induction tree} Lemma_BSTUpperBoundThenInOrderUpperBound(tree:BST<T>, d:
 lemma {:induction tree} Lemma_BSTLowerBoundThenInOrderLowerBound(tree:BST<T>, d:T)
   requires bst_is_ordered(tree)
   requires bst_lower_bound(tree, d)
-  ensures list_lower_bound(BST_InOrder(tree), d) == true
+  ensures list_lower_bound(BST_InOrder(tree), d)
 {
   match tree {
     case Leaf =>
@@ -362,24 +358,3 @@ lemma {:induction tree} Lemma_BSTLowerBoundThenInOrderLowerBound(tree:BST<T>, d:
         }
   }
 }
-
-/*
-function method BST_Load(list:List<T>): (result:BST<T>)
-  ensures bst_is_ordered(result)
-  ensures BST_ToMultiset(result) == List_ToMultiset(input)
-{
-
-}
-
-lemma Lemma_MultisetLoadSameElementsThanList(input:List<T>)
-  ensures BST_ToMultiset(BST_Load(input)) == List_ToMultiset(input)
-{
-
-}
-
-lemma Lemma_LoadOrdered(input:List<T>)
-  ensures bst_is_ordered(BST_Load(input))
-{
-
-}
-*/
