@@ -13,13 +13,3 @@ Extensions: Dafny.
 ## Run
 
 Right click on the .dfy file you want to run, then click on Dafny: Compile and Run.
-
-## Algorithms
-
-- BinarySearch
-
-- BubbleSort
-
-- InsertionSort
-
-- Nats

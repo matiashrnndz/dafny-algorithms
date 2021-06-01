@@ -5,7 +5,7 @@ include "../functional/List.dfy"
 method TreeSort(L:List<int>) returns (sortedList:List<int>)
   ensures list_is_ordered(sortedList)
 {
-  var tree: BST<int> := BST_Init();
+  var tree: BST<int> := Leaf;
   var list := L;
 
   while list != List_Empty
