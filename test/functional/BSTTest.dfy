@@ -6,9 +6,6 @@ method Main() {
   InOrderTest();
   InsertWorstCaseTest();
   ToMultisetTest();
-  ContainsTest();
-  NotContainsTest();
-  MirrorTest();
 }
 
 method SizeTest() {
@@ -52,25 +49,4 @@ method ToMultisetTest() {
   var bstMultiset: multiset<int> := BST_ToMultiset(tree);
   var expected: multiset<int> := multiset{1, 3, 4, 5, 7};
   assert bstMultiset == expected;
-}
-
-method ContainsTest() {
-  var tree: BST<int> := Node(Node(Node(Leaf,1,Leaf),3,Leaf),4,Node(Node(Leaf, 5, Leaf),7,Leaf));
-  var contains: bool := BST_Contains(tree, 3);
-  var expected: bool := true;
-  assert contains == contains;
-}
-
-method NotContainsTest() {
-  var tree: BST<int> := Node(Node(Node(Leaf,1,Leaf),3,Leaf),4,Node(Node(Leaf, 5, Leaf),7,Leaf));
-  var notContains: bool := BST_Contains(tree, 9);
-  var expected: bool := false;
-  assert notContains == expected;
-}
-
-method MirrorTest() {
-  var tree: BST<int> := Node(Node(Node(Leaf,1,Leaf),3,Leaf),4,Node(Node(Leaf, 5, Leaf),7,Leaf));
-  var mirroredTree := BST_Mirror(tree);
-  var expected := Node(Node(Leaf, 7, Node(Leaf, 5, Leaf)), 4, Node(Leaf, 3, Node(Leaf, 1, Leaf)));
-  assert mirroredTree == expected;
 }

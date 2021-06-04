@@ -7,15 +7,6 @@ datatype BST<T> = Leaf | Node(left:BST<T>, data:T, right:BST<T>)
 
 // ---------------------- Function Methods ---------------------- //
 
-function method BST_Size(tree:BST<T>) : (n:int)
-  decreases tree
-{
-    match tree {
-      case Leaf => 0
-      case Node(left, x, right) => BST_Size(left) + 1 + BST_Size(right)
-    }
-}
-
 function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
   // Lemma_InsertOrdered(tree, d) ==> ensures bst_is_ordered(BST_Insert(tree, d))
   // Lemma_InsertUpperBound(tree, d, b) ==> ensures bst_upper_bound(BST_Insert(tree, d), b)
@@ -67,22 +58,13 @@ function method BST_ToMultiset(tree:BST<T>) : multiset<T>
   }
 }
 
-function method BST_Contains(tree:BST<T>, d:T) : bool
+function method BST_Size(tree:BST<T>) : (n:int)
   decreases tree
 {
-  match tree {
-    case Leaf => false
-    case Node(left, x, rigth) => x == d || BST_Contains(left, d) || BST_Contains(rigth, d)
-  }
-}
-
-function method BST_Mirror(tree:BST<T>) : BST<T>
-  decreases tree
-{
-  match tree {
-    case Leaf => Leaf
-    case Node(left, x, right) => Node(BST_Mirror(right), x, BST_Mirror(left))
-  }
+    match tree {
+      case Leaf => 0
+      case Node(left, x, right) => BST_Size(left) + 1 + BST_Size(right)
+    }
 }
 
 // ---------------------- Predicates ---------------------- //
@@ -257,12 +239,11 @@ lemma {:induction tree} Lemma_BSTSameElementsThanInOrder(tree:BST<T>)
     case Node(left, x, right) =>
       calc == {
         List_ToMultiset(BST_InOrder(tree));
-          { assert List_ToMultiset(BST_InOrder(tree)) == List_ToMultiset(BST_InOrder(Node(left, x, right))); }
+          { assert tree == Node(left, x, right); }
         List_ToMultiset(BST_InOrder(Node(left, x, right)));
           { assert List_ToMultiset(BST_InOrder(Node(left, x, right))) == List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))); }
         List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
           { Lemma_ConcatSameElems(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
-          { assert List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))) == List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, BST_InOrder(right))); }
         List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, BST_InOrder(right)));
           { assert List_ToMultiset(Cons(x, BST_InOrder(right))) == List_ToMultiset(Cons(x, List_Empty)) + List_ToMultiset(BST_InOrder(right)); }
         List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, List_Empty)) + List_ToMultiset(BST_InOrder(right));
@@ -372,12 +353,6 @@ lemma {:induction tree} Lemma_BSTLowerBoundThenInOrderLowerBound(tree:BST<T>, d:
   }
 }
 
-lemma {:induction tree} Lemma_InsertSameElemsPlusInsertedAuto(tree:BST<T>, d:T)
-  ensures BST_ToMultiset(BST_Insert(tree, d)) == BST_ToMultiset(tree) + multiset{d}
-{
-  // AUTOMATIC
-}
-
 lemma {:induction tree} Lemma_InsertSameElemsPlusInserted(tree:BST<T>, d:T)
   ensures BST_ToMultiset(BST_Insert(tree, d)) == BST_ToMultiset(tree) + multiset{d}
 {
@@ -409,6 +384,7 @@ lemma {:induction tree} Lemma_InsertSameElemsPlusInserted(tree:BST<T>, d:T)
               { assert BST_Insert(Node(left, x, right), d) == Node(BST_Insert(left, d), x , right); }
             BST_ToMultiset(Node(BST_Insert(left, d), x , right));
               { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right); }
+            BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right);
               { Lemma_InsertSameElemsPlusInserted(left, d); }
           }
         } else {
@@ -417,28 +393,11 @@ lemma {:induction tree} Lemma_InsertSameElemsPlusInserted(tree:BST<T>, d:T)
               { assert BST_Insert(Node(left, x, right), d) == Node(left, x, BST_Insert(right, d)); }
             BST_ToMultiset(Node(left, x, BST_Insert(right, d)));
               { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d)); }
+            BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d));
               { Lemma_InsertSameElemsPlusInserted(right, d); }
           }
         } }
         BST_ToMultiset(tree) + multiset{d};
-      }
-  }
-}
-
-lemma {:induction list} Lemma_LoadIsOrderedAuto(list:List<T>)
-  ensures bst_is_ordered(BST_Load(list))
-{
-  match list {
-    case List_Empty => 
-      // AUTOMATIC
-    case Cons(head, tail) =>
-      calc == {
-        bst_is_ordered(BST_Load(list));
-          { assert list == Cons(head, tail); }
-        bst_is_ordered(BST_Load(Cons(head, tail)));
-          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
-          { Lemma_InsertOrdered(BST_Load(tail), head); }
-        true;
       }
   }
 }
@@ -463,6 +422,7 @@ lemma {:induction list} Lemma_LoadIsOrdered(list:List<T>)
           { assert list == Cons(head, tail); }
         bst_is_ordered(BST_Load(Cons(head, tail)));
           { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
+        bst_is_ordered(BST_Insert(BST_Load(tail), head));
           { Lemma_InsertOrdered(BST_Load(tail), head); }
         true;
       }
@@ -501,3 +461,31 @@ lemma Lemma_LoadTreeElemsSameThanList(list:List<T>)
       }
   }
 }
+
+// ------------------ Dafny Automatic Lemmas ------------------ //
+
+lemma {:induction tree} Lemma_InsertSameElemsPlusInsertedAuto(tree:BST<T>, d:T)
+  ensures BST_ToMultiset(BST_Insert(tree, d)) == BST_ToMultiset(tree) + multiset{d}
+{
+  // AUTOMATIC
+}
+
+lemma {:induction list} Lemma_LoadIsOrderedAuto(list:List<T>)
+  ensures bst_is_ordered(BST_Load(list))
+{
+  match list {
+    case List_Empty => 
+      // AUTOMATIC
+    case Cons(head, tail) =>
+      calc == {
+        bst_is_ordered(BST_Load(list));
+          { assert list == Cons(head, tail); }
+        bst_is_ordered(BST_Load(Cons(head, tail)));
+          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
+          { Lemma_InsertOrdered(BST_Load(tail), head); }
+        true;
+      }
+  }
+}
+
+// Faltan agregar más automáticos, hay que revisar los lemmas anteriores
