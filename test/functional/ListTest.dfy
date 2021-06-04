@@ -1,7 +1,6 @@
 include "../../src/functional/List.dfy"
 
 method Main() {
-  InitTest();
   SizeZeroTest();
   SizeTest();
   InsertIntoListTest();
@@ -9,12 +8,6 @@ method Main() {
   ToMultisetTest();
   HeadTest();
   TailTest();
-}
-
-method InitTest() {
-  var list: List<int> := List_Init();
-  assert list_is_ordered(list);
-  assert list == List_Empty;
 }
 
 method InsertIntoListTest() {

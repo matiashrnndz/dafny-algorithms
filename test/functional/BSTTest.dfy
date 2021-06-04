@@ -1,7 +1,6 @@
 include "../../src/functional/BST.dfy"
 
 method Main() {
-  InitTest();
   SizeTest();
   InsertTest();
   InOrderTest();
@@ -10,13 +9,6 @@ method Main() {
   ContainsTest();
   NotContainsTest();
   MirrorTest();
-}
-
-method InitTest() {
-  var tree: BST<int> := BST_Init();
-  var expected := Leaf;
-  assert bst_is_ordered(tree);
-  assert tree == expected;
 }
 
 method SizeTest() {
@@ -34,7 +26,7 @@ method InOrderTest() {
 }
 
 method InsertTest() {
-  var tree: BST<int> := BST_Init();
+  var tree: BST<int> := Leaf;
   tree := BST_Insert(tree, 4);
   tree := BST_Insert(tree, 3);
   tree := BST_Insert(tree, 1);
@@ -45,7 +37,7 @@ method InsertTest() {
 }
 
 method InsertWorstCaseTest() {
-  var tree := BST_Init();
+  var tree := Leaf;
   tree := BST_Insert(tree, 1);
   tree := BST_Insert(tree, 3);
   tree := BST_Insert(tree, 4);

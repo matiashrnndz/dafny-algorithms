@@ -20,11 +20,12 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
   // Lemma_InsertOrdered(tree, d) ==> ensures bst_is_ordered(BST_Insert(tree, d))
   // Lemma_InsertUpperBound(tree, d, b) ==> ensures bst_upper_bound(BST_Insert(tree, d), b)
   // Lemma_InsertLowerBound(tree, d, b) ==> ensures bst_lower_bound(BST_Insert(tree, d), b)
+  // Lemma_InsertSameElemsPlusInserted(tree, d) ==> ensures BST_ToMultiset(tree) + multiset{d} == BST_ToMultiset(BST_Insert(tree, d)) 
   decreases tree
 {
   match tree {
     case Leaf => Node(Leaf, d, Leaf)
-    case Node(left, x, right) => 
+    case Node(left, x, right) =>
       if (d < x) then
         Node(BST_Insert(left, d), x , right)
       else
@@ -33,7 +34,7 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
 }
 
 function method BST_InOrder(tree:BST<T>) : (result:List<T>)
-  // Lemma_BSTSameElementsThanInOrder(tree) ==> ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
+  // Lemma_BSTSameElementsThanInOrder(tree) ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
   // Lemma_BSTOrderedThenInOrderOrdered(tree) ==> ensures list_is_ordered(BST_InOrder(tree))
   // Lemma_BSTUpperBoundThenInOrderUpperBound(tree, d) ==> ensures list_upper_bound(BST_InOrder(tree), d)
   // Lemma_BSTLowerBoundThenInOrderLowerBound(tree, d) ==> ensures list_lower_bound(BST_InOrder(tree), d)
@@ -41,7 +42,19 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
 {
   match tree {
     case Leaf => List_Empty
-    case Node(left, x, right) => List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))
+    case Node(left, x, right) => 
+      List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))
+  }
+}
+
+function method BST_Load(list:List<T>) : (tree:BST<T>)
+  // Lemma_LoadIsOrdered(list) ==> ensures bst_is_ordered(BST_Load(list))
+  // Lemma_LoadTreeElemsSameThanList(list:List<T>) ==> ensures List_ToMultiset(list) == BST_ToMultiset(BST_Load(list))
+  decreases list
+{
+  match list {
+    case List_Empty => Leaf
+    case Cons(head, tail) => BST_Insert(BST_Load(tail), head)
   }
 }
 
@@ -356,5 +369,135 @@ lemma {:induction tree} Lemma_BSTLowerBoundThenInOrderLowerBound(tree:BST<T>, d:
             { Lemma_IfElemLowerBoundOfTwoListsThenIsLowerBoundOfConcat(BST_InOrder(left), BST_InOrder(right), d, x); }
           true;
         }
+  }
+}
+
+lemma {:induction tree} Lemma_InsertSameElemsPlusInsertedAuto(tree:BST<T>, d:T)
+  ensures BST_ToMultiset(BST_Insert(tree, d)) == BST_ToMultiset(tree) + multiset{d}
+{
+  // AUTOMATIC
+}
+
+lemma {:induction tree} Lemma_InsertSameElemsPlusInserted(tree:BST<T>, d:T)
+  ensures BST_ToMultiset(BST_Insert(tree, d)) == BST_ToMultiset(tree) + multiset{d}
+{
+  match tree {
+    case Leaf => 
+      calc == {
+        BST_ToMultiset(BST_Insert(tree, d));
+          { assert tree == Leaf; }
+        BST_ToMultiset(BST_Insert(Leaf, d));
+          { assert BST_Insert(Leaf, d) == Node(Leaf, d, Leaf); }
+        BST_ToMultiset(Node(Leaf, d, Leaf));
+          { assert BST_ToMultiset(Node(Leaf, d, Leaf)) == BST_ToMultiset(Leaf) + multiset{d} + BST_ToMultiset(Leaf); }
+        BST_ToMultiset(Leaf) + multiset{d} + BST_ToMultiset(Leaf);
+          { assert BST_ToMultiset(Leaf) == multiset{}; }
+        BST_ToMultiset(Leaf) + multiset{d} + multiset{};
+          { assert multiset{d} + multiset{} == multiset{d}; }
+        BST_ToMultiset(Leaf) + multiset{d}; 
+          { assert Leaf == tree; }
+        BST_ToMultiset(tree) + multiset{d};
+      }
+    case Node(left, x, right) =>
+      calc == {
+        BST_ToMultiset(BST_Insert(tree, d));
+          { assert tree == Node(left, x, right); }
+        BST_ToMultiset(BST_Insert(Node(left, x, right), d));
+        { if (d < x) {
+          calc == {
+            BST_ToMultiset(BST_Insert(Node(left, x, right), d));
+              { assert BST_Insert(Node(left, x, right), d) == Node(BST_Insert(left, d), x , right); }
+            BST_ToMultiset(Node(BST_Insert(left, d), x , right));
+              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right); }
+              { Lemma_InsertSameElemsPlusInserted(left, d); }
+          }
+        } else {
+          calc == {
+            BST_ToMultiset(BST_Insert(Node(left, x, right), d));
+              { assert BST_Insert(Node(left, x, right), d) == Node(left, x, BST_Insert(right, d)); }
+            BST_ToMultiset(Node(left, x, BST_Insert(right, d)));
+              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d)); }
+              { Lemma_InsertSameElemsPlusInserted(right, d); }
+          }
+        } }
+        BST_ToMultiset(tree) + multiset{d};
+      }
+  }
+}
+
+lemma {:induction list} Lemma_LoadIsOrderedAuto(list:List<T>)
+  ensures bst_is_ordered(BST_Load(list))
+{
+  match list {
+    case List_Empty => 
+      // AUTOMATIC
+    case Cons(head, tail) =>
+      calc == {
+        bst_is_ordered(BST_Load(list));
+          { assert list == Cons(head, tail); }
+        bst_is_ordered(BST_Load(Cons(head, tail)));
+          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
+          { Lemma_InsertOrdered(BST_Load(tail), head); }
+        true;
+      }
+  }
+}
+
+lemma {:induction list} Lemma_LoadIsOrdered(list:List<T>)
+  ensures bst_is_ordered(BST_Load(list))
+{
+  match list {
+    case List_Empty =>
+      calc == {
+        bst_is_ordered(BST_Load(list));
+          { assert list == List_Empty; }
+        bst_is_ordered(BST_Load(List_Empty));
+          { assert BST_Load(List_Empty) == Leaf; }
+        bst_is_ordered(Leaf);
+          { assert bst_is_ordered(Leaf) == true; }
+        true;
+      }
+    case Cons(head, tail) =>
+      calc == {
+        bst_is_ordered(BST_Load(list));
+          { assert list == Cons(head, tail); }
+        bst_is_ordered(BST_Load(Cons(head, tail)));
+          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
+          { Lemma_InsertOrdered(BST_Load(tail), head); }
+        true;
+      }
+  }
+}
+
+lemma Lemma_LoadTreeElemsSameThanList(list:List<T>)
+  ensures BST_ToMultiset(BST_Load(list)) == List_ToMultiset(list)
+{
+  match list {
+    case List_Empty =>
+      calc == {
+        BST_ToMultiset(BST_Load(list));
+          { assert list == List_Empty; }
+        BST_ToMultiset(BST_Load(List_Empty));
+          { assert BST_Load(List_Empty) == Leaf; }
+        BST_ToMultiset(Leaf);
+          { assert BST_ToMultiset(Leaf) == multiset{}; }
+        multiset{};
+          { assert multiset{} == List_ToMultiset(List_Empty); }
+        List_ToMultiset(List_Empty);
+          { assert List_Empty == list; }
+        List_ToMultiset(list);
+      }
+    case Cons(head, tail) =>
+      calc == {
+        BST_ToMultiset(BST_Load(list));
+          { assert list == Cons(head, tail); }
+        BST_ToMultiset(BST_Load(Cons(head, tail)));
+          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
+        BST_ToMultiset(BST_Insert(BST_Load(tail), head));
+          { Lemma_InsertSameElemsPlusInserted(BST_Load(tail), head); }
+        BST_ToMultiset(BST_Load(tail)) + multiset{head};
+          { Lemma_LoadTreeElemsSameThanList(tail); }
+        List_ToMultiset(list);
+      }
   }
 }
