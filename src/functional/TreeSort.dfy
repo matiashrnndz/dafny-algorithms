@@ -1,5 +1,4 @@
 include "./BST.dfy"
-include "./List.dfy"
 
 function method TreeSort(list:List<int>) : (sortedList:List<int>)
   // Lemma_TreeSortListIsOrdered(list) ==> ensures list_is_ordered(TreeSort(list))
@@ -16,7 +15,7 @@ lemma {:induction list} Lemma_TreeSortListIsOrdered(list:List<T>)
     list_is_ordered(TreeSort(list));
       { assert TreeSort(list) == BST_InOrder(BST_Load(list)); }
     list_is_ordered(BST_InOrder(BST_Load(list)));
-      { Lemma_LoadIsOrdered(list); }
+      { Lemma_BSTLoadIsOrdered(list); }
       { assert bst_is_ordered(BST_Load(list)); }
       { Lemma_BSTOrderedThenInOrderOrdered(BST_Load(list)); }
     true;
@@ -30,11 +29,11 @@ lemma {:induction list} Lemma_TreeSortSameElemsThanList(list:List<T>)
     List_ToMultiset(TreeSort(list));
       { assert TreeSort(list) == BST_InOrder(BST_Load(list)); }
     List_ToMultiset(BST_InOrder(BST_Load(list)));
-      { Lemma_LoadIsOrdered(list); }
+      { Lemma_BSTLoadIsOrdered(list); }
       { assert bst_is_ordered(BST_Load(list)); }
       { Lemma_BSTSameElementsThanInOrder(BST_Load(list)); }
     BST_ToMultiset(BST_Load(list));
-      { Lemma_LoadTreeElemsSameThanList(list); }
+      { Lemma_BSTLoadTreeElemsSameThanList(list); }
     List_ToMultiset(list);
   }
 }
