@@ -4,7 +4,6 @@ method Main() {
   FibonacciRecursiveTest();
   FibonacciTailRecursiveCallTest();
   FibonacciIterativeTest();
-  // FibonacciDynamicProgrammingTest();
 }
 
 method FibonacciRecursiveTest() {
@@ -51,26 +50,3 @@ method FibonacciIterativeTest() {
   var fib8 := FibonacciIterative(8);
   assert fib8 == 21;
 }
-
-/*
-method FibonacciDynamicProgrammingTest() {
-  var fib0 := FibonacciDynamicProgramming(0);
-  assert fib0 == 0;
-  var fib1 := FibonacciDynamicProgramming(1);
-  assert fib1 == 1;
-  var fib2 := FibonacciDynamicProgramming(2);
-  assert fib2 == 1;
-  var fib3 := FibonacciDynamicProgramming(3);
-  assert fib3 == 2;
-  var fib4 := FibonacciDynamicProgramming(4);
-  assert fib4 == 3;
-  var fib5 := FibonacciDynamicProgramming(5);
-  assert fib5 == 5;
-  var fib6 := FibonacciDynamicProgramming(6);
-  assert fib6 == 8;
-  var fib7 := FibonacciDynamicProgramming(7);
-  assert fib7 == 13;
-  var fib8 := FibonacciDynamicProgramming(8);
-  assert fib8 == 21;
-}
-*/
