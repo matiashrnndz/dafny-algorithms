@@ -17,6 +17,10 @@ method FibonacciRecursiveTest() {
   assert FibonacciRecursive(6) == 8;
   assert FibonacciRecursive(7) == 13;
   assert FibonacciRecursive(8) == 21;
+  assert FibonacciRecursive(9) == 34;
+  assert FibonacciRecursive(10) == 55;
+  assert FibonacciRecursive(11) == 89;
+  assert FibonacciRecursive(12) == 144;
 }
 
 method FibonacciTailRecursiveCallTest() {
@@ -29,6 +33,10 @@ method FibonacciTailRecursiveCallTest() {
   assert FibonacciTailRecursive(6, 0, 1) == 8;
   assert FibonacciTailRecursive(7, 0, 1) == 13;
   assert FibonacciTailRecursive(8, 0, 1) == 21;
+  assert FibonacciTailRecursive(9, 0, 1) == 34;
+  assert FibonacciTailRecursive(10, 0, 1) == 55;
+  assert FibonacciTailRecursive(11, 0, 1) == 89;
+  assert FibonacciTailRecursive(12, 0 ,1) == 144;
 }
 
 method FibonacciRecursivePairTest() {
@@ -41,25 +49,37 @@ method FibonacciRecursivePairTest() {
   assert FibonacciRecursivePair(6) == 8;
   assert FibonacciRecursivePair(7) == 13;
   assert FibonacciRecursivePair(8) == 21;
+  assert FibonacciRecursivePair(9) == 34;
+  assert FibonacciRecursivePair(10) == 55;
+  assert FibonacciRecursivePair(11) == 89;
+  assert FibonacciRecursivePair(12) == 144;
 }
 
 method FibonacciIterativeTest() {
-  var fib0 := FibonacciIterative(0);
-  assert fib0 == 0;
-  var fib1 := FibonacciIterative(1);
-  assert fib1 == 1;
-  var fib2 := FibonacciIterative(2);
-  assert fib2 == 1;
-  var fib3 := FibonacciIterative(3);
-  assert fib3 == 2;
-  var fib4 := FibonacciIterative(4);
-  assert fib4 == 3;
-  var fib5 := FibonacciIterative(5);
-  assert fib5 == 5;
-  var fib6 := FibonacciIterative(6);
-  assert fib6 == 8;
-  var fib7 := FibonacciIterative(7);
-  assert fib7 == 13;
-  var fib8 := FibonacciIterative(8);
-  assert fib8 == 21;
+  var fib := FibonacciIterative(0);
+  assert fib == 0;
+  fib := FibonacciIterative(1);
+  assert fib == 1;
+  fib := FibonacciIterative(2);
+  assert fib == 1;
+  fib := FibonacciIterative(3);
+  assert fib == 2;
+  fib := FibonacciIterative(4);
+  assert fib == 3;
+  fib := FibonacciIterative(5);
+  assert fib == 5;
+  fib := FibonacciIterative(6);
+  assert fib == 8;
+  fib := FibonacciIterative(7);
+  assert fib == 13;
+  fib := FibonacciIterative(8);
+  assert fib == 21;
+  fib := FibonacciIterative(9);
+  assert fib == 34;
+  fib := FibonacciIterative(10);
+  assert fib == 55;
+  fib := FibonacciIterative(11);
+  assert fib == 89;
+  fib := FibonacciIterative(12);
+  assert fib == 144;
 }

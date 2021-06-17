@@ -11,12 +11,12 @@ function method FibonacciRecursive(n: nat): nat
 
 // ---------------- Fibonacci :: Tail Recursive ---------------- //
 
-function method FibonacciTailRecursive(n: nat, a: nat, b: nat): nat
-  // Initial call should be with a=0 and b=1
+function method FibonacciTailRecursive(n: nat, f: nat, f': nat): nat
+  // Initial call should be with f=0 and f'=1
   decreases n
 {
-  if (n == 0) then a else
-  FibonacciTailRecursive(n-1, b, a+b)
+  if (n == 0) then f else
+  FibonacciTailRecursive(n-1, f', f+f')
 }
 
 // --------------- Fibonacci :: Recursive Pair --------------- //
@@ -39,20 +39,20 @@ function method FibonacciRecursivePairAux(n: nat): (nat, nat)
 
 // ------------------ Fibonacci :: Iterative ------------------ //
 
-method FibonacciIterative(n: nat) returns (y: nat)
-  ensures y == FibonacciRecursive(n)
+method FibonacciIterative(n: nat) returns (f: nat)
+  ensures f == FibonacciRecursive(n)
 {
-  y := 0;
-  var x: nat := 1;
+  f := 0;
+  var f': nat := 1;
   var i: nat := 0;
 
   while i < n
     invariant 0 <= i <= n
-    invariant y == FibonacciRecursive(i)
-    invariant x == FibonacciRecursive(i+1)
+    invariant f == FibonacciRecursive(i)
+    invariant f' == FibonacciRecursive(i+1)
     decreases n-i
   {
-    y, x := x, y + x;
-    i := i + 1;
+    f, f' := f', f+f';
+    i := i+1;
   }
 }
