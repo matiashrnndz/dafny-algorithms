@@ -22,6 +22,7 @@ function method FibonacciTailRecursive(n: nat, f: nat, f': nat): nat
 // --------------- Fibonacci :: Recursive Pair --------------- //
 
 function method FibonacciRecursivePair(n: nat): nat
+  // Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n) ==> ensures FibonacciRecursivePair(n) == FibonacciRecursive(n)
 {
   match FibonacciRecursivePairAux(n) {
     case (f, f') => f
@@ -29,6 +30,7 @@ function method FibonacciRecursivePair(n: nat): nat
 }
 
 function method FibonacciRecursivePairAux(n: nat): (nat, nat)
+  // Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n) ==> ensures FibonacciRecursivePairAux(n) == (FibonacciRecursive(n), FibonacciRecursive(n+1))
   decreases n
 {
   if (n == 0) then (0, 1) else
@@ -55,4 +57,23 @@ method FibonacciIterative(n: nat) returns (f: nat)
     f, f' := f', f+f';
     i := i+1;
   }
+}
+
+// ------------------------ Lemmas ------------------------ //
+
+lemma {:induction n} Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n: nat)
+  ensures FibonacciRecursivePair(n) == FibonacciRecursive(n)
+{
+  calc == {
+    FibonacciRecursivePair(n);
+    { Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n); }
+      { assert FibonacciRecursivePairAux(n) == (FibonacciRecursive(n), FibonacciRecursive(n+1)); }
+    FibonacciRecursive(n);
+  }
+}
+
+lemma {:induction n} Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n: nat)
+  ensures FibonacciRecursivePairAux(n) == (FibonacciRecursive(n), FibonacciRecursive(n+1))
+{
+
 }
