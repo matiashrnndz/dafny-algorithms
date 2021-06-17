@@ -1,7 +1,7 @@
 
 // ------------------ Fibonacci :: Recursive ------------------ //
 
-function method FibonacciRecursive(n: nat) : nat
+function method FibonacciRecursive(n: nat): nat
   decreases n
 {
   if (n == 0) then 0 else
@@ -17,6 +17,24 @@ function method FibonacciTailRecursive(n: nat, a: nat, b: nat): nat
 {
   if (n == 0) then a else
   FibonacciTailRecursive(n-1, b, a+b)
+}
+
+// --------------- Fibonacci :: Recursive Pair --------------- //
+
+function method FibonacciRecursivePair(n: nat): nat
+{
+  match FibonacciRecursivePairAux(n) {
+    case (f, f') => f
+  }
+}
+
+function method FibonacciRecursivePairAux(n: nat): (nat, nat)
+  decreases n
+{
+  if (n == 0) then (0, 1) else
+  match FibonacciRecursivePairAux(n-1) {
+    case (f, f') => (f', f+f')
+  }
 }
 
 // ------------------ Fibonacci :: Iterative ------------------ //

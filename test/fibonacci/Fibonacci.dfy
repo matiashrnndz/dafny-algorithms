@@ -3,6 +3,7 @@ include "../../src/fibonacci/Fibonacci.dfy"
 method Main() {
   FibonacciRecursiveTest();
   FibonacciTailRecursiveCallTest();
+  FibonacciRecursivePairTest();
   FibonacciIterativeTest();
 }
 
@@ -28,6 +29,18 @@ method FibonacciTailRecursiveCallTest() {
   assert FibonacciTailRecursive(6, 0, 1) == 8;
   assert FibonacciTailRecursive(7, 0, 1) == 13;
   assert FibonacciTailRecursive(8, 0, 1) == 21;
+}
+
+method FibonacciRecursivePairTest() {
+  assert FibonacciRecursivePair(0) == 0;
+  assert FibonacciRecursivePair(1) == 1;
+  assert FibonacciRecursivePair(2) == 1;
+  assert FibonacciRecursivePair(3) == 2;
+  assert FibonacciRecursivePair(4) == 3;
+  assert FibonacciRecursivePair(5) == 5;
+  assert FibonacciRecursivePair(6) == 8;
+  assert FibonacciRecursivePair(7) == 13;
+  assert FibonacciRecursivePair(8) == 21;
 }
 
 method FibonacciIterativeTest() {
