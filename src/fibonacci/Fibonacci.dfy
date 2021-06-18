@@ -74,6 +74,31 @@ lemma {:induction n} Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n: nat
 
 lemma {:induction n} Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n: nat)
   ensures FibonacciRecursivePairAux(n) == (FibonacciRecursive(n), FibonacciRecursive(n+1))
+  decreases n
 {
-
+  if (n == 0) {
+    calc == {
+      FibonacciRecursivePairAux(n);
+        { assert n == 0; }
+      FibonacciRecursivePairAux(0);
+        { assert FibonacciRecursivePairAux(0) == (0, 1); }
+      (0, 1);
+        { assert FibonacciRecursive(0) == 0; }
+        { assert FibonacciRecursive(0+1) == 1; }
+        { assert (0, 1) == (FibonacciRecursive(0), FibonacciRecursive(0+1)); }
+      (FibonacciRecursive(0), FibonacciRecursive(0+1));
+    }
+  } else {
+    calc == {
+      FibonacciRecursivePairAux(n);
+        { assert n > 0; }
+    }
+    match FibonacciRecursivePairAux(n-1) {
+      case (f, f') =>
+        calc == {
+          (f', f+f');
+          { Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n-1); }
+        }
+    }
+  }
 }
