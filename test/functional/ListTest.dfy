@@ -1,16 +1,16 @@
 include "../../src/functional/List.dfy"
 
 method Main() {
-  SizeZeroTest();
-  SizeTest();
-  InsertIntoListTest();
-  ConcatTwoListsTest();
-  ToMultisetTest();
-  HeadTest();
-  TailTest();
+  Test_SizeZero();
+  Test_Size();
+  Test_InsertIntoList();
+  Test_ConcatTwoLists();
+  Test_ToMultiset();
+  Test_Head();
+  Test_Tail();
 }
 
-method InsertIntoListTest() {
+method Test_InsertIntoList() {
   var list: List<int> := List_Empty;
   list := List_Insert(list, 2);
   list := List_Insert(list, 10);
@@ -21,7 +21,7 @@ method InsertIntoListTest() {
   assert expected == list;
 }
 
-method ConcatTwoListsTest() {
+method Test_ConcatTwoLists() {
   var a: List<int> := List_Empty;
   a := List_Insert(a, 2);
   a := List_Insert(a, 10);
@@ -34,34 +34,34 @@ method ConcatTwoListsTest() {
   assert expected == c;
 }
 
-method SizeZeroTest() {
+method Test_SizeZero() {
   var list: List<int> := List_Empty;
   var size := List_Size(list);
   var expected := 0;
   assert expected == size;
 }
 
-method SizeTest() {
+method Test_Size() {
   var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
   var size := List_Size(list);
   var expected := 5;
   assert expected == size;
 }
 
-method ToMultisetTest() {
+method Test_ToMultiset() {
   var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
   var elems: multiset<int> := List_ToMultiset(list);
   var expected := multiset{2, 10, 4, 12, 7};
   assert expected == elems;
 }
 
-method HeadTest() {
+method Test_Head() {
   var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
   var head: int := List_Head(list);
   assert head == 2;
 }
 
-method TailTest() {
+method Test_Tail() {
   var list: List<int> := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
   var tail: List<int> := List_Tail(list);
   assert tail ==  Cons(10, Cons(4, Cons(12, Cons(7, List_Empty))));

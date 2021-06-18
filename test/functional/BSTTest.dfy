@@ -1,28 +1,28 @@
 include "../../src/functional/BST.dfy"
 
 method Main() {
-  SizeTest();
-  InsertTest();
-  InOrderTest();
-  InsertWorstCaseTest();
-  ToMultisetTest();
+  Test_Size();
+  Test_Insert();
+  Test_InOrder();
+  Test_InsertWorstCase();
+  Test_ToMultiset();
 }
 
-method SizeTest() {
+method Test_Size() {
   var tree: BST<int> := Node(Node(Node(Leaf,1,Leaf),3,Leaf),4,Node(Node(Leaf, 5, Leaf),7,Leaf));
   var size: int := BST_Size(tree);
   var expected: int := 5;
   assert size == expected;
 }
 
-method InOrderTest() {
+method Test_InOrder() {
   var tree: BST<int> := Node(Node(Node(Leaf,1,Leaf),3,Leaf),4,Node(Node(Leaf, 5, Leaf),7,Leaf));
   var list := BST_InOrder(tree);
   var expected := Cons(1, Cons(3, Cons(4, Cons(5, Cons(7, List_Empty)))));
   assert list == expected;
 }
 
-method InsertTest() {
+method Test_Insert() {
   var tree: BST<int> := Leaf;
   tree := BST_Insert(tree, 4);
   tree := BST_Insert(tree, 3);
@@ -33,7 +33,7 @@ method InsertTest() {
   assert tree == expected;
 }
 
-method InsertWorstCaseTest() {
+method Test_InsertWorstCase() {
   var tree := Leaf;
   tree := BST_Insert(tree, 1);
   tree := BST_Insert(tree, 3);
@@ -44,7 +44,7 @@ method InsertWorstCaseTest() {
   assert tree == expected;
 }
 
-method ToMultisetTest() {
+method Test_ToMultiset() {
   var tree: BST<int> := Node(Node(Node(Leaf,1,Leaf),3,Leaf),4,Node(Node(Leaf, 5, Leaf),7,Leaf));
   var bstMultiset: multiset<int> := BST_ToMultiset(tree);
   var expected: multiset<int> := multiset{1, 3, 4, 5, 7};

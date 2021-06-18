@@ -1,4 +1,10 @@
 
+/** Explicación:
+
+  invariant forall k :: 0 <= k < i ==> A[k] != key
+    Ningún elemento tal que su índice sea menor al actual puede ser el elemento buscado
+
+ */
 method LinealSearch(A:array<int>, key:int) returns (index:int)
   ensures 0 <= index ==> index < A.Length && A[index] == key
   ensures index < 0 ==> key !in A[..]
@@ -20,9 +26,4 @@ method LinealSearch(A:array<int>, key:int) returns (index:int)
   return -1;
 }
 
-/* Explicación:
 
-invariant forall k :: 0 <= k < i ==> A[k] != key
-    // Ningún elemento tal que su índice sea menor al actual puede ser el elemento buscado
-
-*/

@@ -7,11 +7,22 @@ datatype BST<T> = Leaf | Node(left:BST<T>, data:T, right:BST<T>)
 
 // ---------------------- Function Methods ---------------------- //
 
+/** Properties:
+
+  Lemma_BSTInsertOrdered(tree, d)
+    ==> ensures bst_is_ordered(BST_Insert(tree, d))
+
+  Lemma_BSTInsertUpperBound(tree, d, b)
+    ==> ensures bst_upper_bound(BST_Insert(tree, d), b)
+
+  Lemma_BSTInsertLowerBound(tree, d, b)
+    ==> ensures bst_lower_bound(BST_Insert(tree, d), b)
+
+  Lemma_BSTInsertSameElemsPlusInserted(tree, d)
+    ==> ensures BST_ToMultiset(tree) + multiset{d} == BST_ToMultiset(BST_Insert(tree, d))
+
+ */
 function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
-  // Lemma_BSTInsertOrdered(tree, d) ==> ensures bst_is_ordered(BST_Insert(tree, d))
-  // Lemma_BSTInsertUpperBound(tree, d, b) ==> ensures bst_upper_bound(BST_Insert(tree, d), b)
-  // Lemma_BSTInsertLowerBound(tree, d, b) ==> ensures bst_lower_bound(BST_Insert(tree, d), b)
-  // Lemma_BSTInsertSameElemsPlusInserted(tree, d) ==> ensures BST_ToMultiset(tree) + multiset{d} == BST_ToMultiset(BST_Insert(tree, d)) 
   decreases tree
 {
   match tree {
@@ -24,11 +35,22 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
   }
 }
 
+/** Properties:
+
+  Lemma_BSTSameElementsThanInOrder(tree)
+    ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
+
+  Lemma_BSTOrderedThenInOrderOrdered(tree)
+    ==> ensures list_is_ordered(BST_InOrder(tree))
+
+  Lemma_BSTUpperBoundThenInOrderUpperBound(tree, d)
+    ==> ensures list_upper_bound(BST_InOrder(tree), d)
+
+  Lemma_BSTLowerBoundThenInOrderLowerBound(tree, d)
+    ==> ensures list_lower_bound(BST_InOrder(tree), d)
+
+ */
 function method BST_InOrder(tree:BST<T>) : (result:List<T>)
-  // Lemma_BSTSameElementsThanInOrder(tree) ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
-  // Lemma_BSTOrderedThenInOrderOrdered(tree) ==> ensures list_is_ordered(BST_InOrder(tree))
-  // Lemma_BSTUpperBoundThenInOrderUpperBound(tree, d) ==> ensures list_upper_bound(BST_InOrder(tree), d)
-  // Lemma_BSTLowerBoundThenInOrderLowerBound(tree, d) ==> ensures list_lower_bound(BST_InOrder(tree), d)
   decreases tree
 {
   match tree {
@@ -38,9 +60,16 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
   }
 }
 
+/** Properties:
+
+  Lemma_BSTLoadIsOrdered(list)
+    ==> ensures bst_is_ordered(BST_Load(list))
+
+  Lemma_BSTLoadTreeElemsSameThanList(list:List<T>)
+    ==> ensures List_ToMultiset(list) == BST_ToMultiset(BST_Load(list))
+
+ */
 function method BST_Load(list:List<T>) : (tree:BST<T>)
-  // Lemma_BSTLoadIsOrdered(list) ==> ensures bst_is_ordered(BST_Load(list))
-  // Lemma_BSTLoadTreeElemsSameThanList(list:List<T>) ==> ensures List_ToMultiset(list) == BST_ToMultiset(BST_Load(list))
   decreases list
 {
   match list {
@@ -464,31 +493,3 @@ lemma {:induction list} Lemma_BSTLoadTreeElemsSameThanList(list:List<T>)
       }
   }
 }
-
-// ------------------ Dafny Automatic Lemmas ------------------ //
-
-lemma {:induction list} Lemma_BSTLoadIsOrderedAuto(list:List<T>)
-  ensures bst_is_ordered(BST_Load(list))
-{
-  match list {
-    case List_Empty => 
-      // AUTOMATIC
-    case Cons(head, tail) =>
-      calc == {
-        bst_is_ordered(BST_Load(list));
-          { assert list == Cons(head, tail); }
-        bst_is_ordered(BST_Load(Cons(head, tail)));
-          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
-          { Lemma_BSTInsertOrdered(BST_Load(tail), head); }
-        true;
-      }
-  }
-}
-
-lemma {:induction tree} Lemma_BSTInsertSameElemsPlusInsertedAuto(tree:BST<T>, d:T)
-  ensures BST_ToMultiset(BST_Insert(tree, d)) == BST_ToMultiset(tree) + multiset{d}
-{
-  // AUTOMATIC
-}
-
-// Faltan agregar más automáticos, hay que revisar los lemmas anteriores

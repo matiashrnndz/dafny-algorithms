@@ -1,48 +1,63 @@
 
 // ------------------ Fibonacci :: Recursive ------------------ //
 
-function method FibonacciRecursive(n: nat): nat
+function method Fibonacci_Recursive(n: nat): nat
   decreases n
 {
   if (n == 0) then 0 else
   if (n == 1) then 1 else
-  FibonacciRecursive(n-2) + FibonacciRecursive(n-1)
+  Fibonacci_Recursive(n-2) + Fibonacci_Recursive(n-1)
 }
 
 // ---------------- Fibonacci :: Tail Recursive ---------------- //
 
-function method FibonacciTailRecursive(n: nat, f: nat, f': nat): nat
-  // Initial call should be with f=0 and f'=1
+
+/** Requirements:
+
+  Initial call should be with f=0 and f'=1
+
+ */
+function method Fibonacci_TailRecursive(n: nat, f: nat, f': nat): nat
   decreases n
 {
   if (n == 0) then f else
-  FibonacciTailRecursive(n-1, f', f+f')
+  Fibonacci_TailRecursive(n-1, f', f+f')
 }
 
 // --------------- Fibonacci :: Recursive Pair --------------- //
 
-function method FibonacciRecursivePair(n: nat): nat
-  // Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n) ==> ensures FibonacciRecursivePair(n) == FibonacciRecursive(n)
+/** Properties:
+
+  Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n) 
+    ==> ensures Fibonacci_RecursivePair(n) == Fibonacci_Recursive(n)
+
+ */
+function method Fibonacci_RecursivePair(n: nat): nat
 {
-  match FibonacciRecursivePairAux(n) {
+  match Fibonacci_RecursivePairAux(n) {
     case (f, f') => f
   }
 }
 
-function method FibonacciRecursivePairAux(n: nat): (nat, nat)
-  // Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n) ==> ensures FibonacciRecursivePairAux(n) == (FibonacciRecursive(n), FibonacciRecursive(n+1))
+/** Properties:
+
+  Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n) 
+    ==> ensures Fibonacci_RecursivePairAux(n) == (Fibonacci_Recursive(n), Fibonacci_Recursive(n+1))
+
+ */
+function method Fibonacci_RecursivePairAux(n: nat): (nat, nat)
   decreases n
 {
   if (n == 0) then (0, 1) else
-  match FibonacciRecursivePairAux(n-1) {
+  match Fibonacci_RecursivePairAux(n-1) {
     case (f, f') => (f', f+f')
   }
 }
 
 // ------------------ Fibonacci :: Iterative ------------------ //
 
-method FibonacciIterative(n: nat) returns (f: nat)
-  ensures f == FibonacciRecursive(n)
+method Fibonacci_Iterative(n: nat) returns (f: nat)
+  ensures f == Fibonacci_Recursive(n)
 {
   f := 0;
   var f': nat := 1;
@@ -50,8 +65,8 @@ method FibonacciIterative(n: nat) returns (f: nat)
 
   while i < n
     invariant 0 <= i <= n
-    invariant f == FibonacciRecursive(i)
-    invariant f' == FibonacciRecursive(i+1)
+    invariant f == Fibonacci_Recursive(i)
+    invariant f' == Fibonacci_Recursive(i+1)
     decreases n-i
   {
     f, f' := f', f+f';
@@ -62,38 +77,38 @@ method FibonacciIterative(n: nat) returns (f: nat)
 // ------------------------ Lemmas ------------------------ //
 
 lemma {:induction n} Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n: nat)
-  ensures FibonacciRecursivePair(n) == FibonacciRecursive(n)
+  ensures Fibonacci_RecursivePair(n) == Fibonacci_Recursive(n)
 {
   calc == {
-    FibonacciRecursivePair(n);
+    Fibonacci_RecursivePair(n);
     { Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n); }
-      { assert FibonacciRecursivePairAux(n) == (FibonacciRecursive(n), FibonacciRecursive(n+1)); }
-    FibonacciRecursive(n);
+      { assert Fibonacci_RecursivePairAux(n) == (Fibonacci_Recursive(n), Fibonacci_Recursive(n+1)); }
+    Fibonacci_Recursive(n);
   }
 }
 
 lemma {:induction n} Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n: nat)
-  ensures FibonacciRecursivePairAux(n) == (FibonacciRecursive(n), FibonacciRecursive(n+1))
+  ensures Fibonacci_RecursivePairAux(n) == (Fibonacci_Recursive(n), Fibonacci_Recursive(n+1))
   decreases n
 {
   if (n == 0) {
     calc == {
-      FibonacciRecursivePairAux(n);
+      Fibonacci_RecursivePairAux(n);
         { assert n == 0; }
-      FibonacciRecursivePairAux(0);
-        { assert FibonacciRecursivePairAux(0) == (0, 1); }
+      Fibonacci_RecursivePairAux(0);
+        { assert Fibonacci_RecursivePairAux(0) == (0, 1); }
       (0, 1);
-        { assert FibonacciRecursive(0) == 0; }
-        { assert FibonacciRecursive(0+1) == 1; }
-        { assert (0, 1) == (FibonacciRecursive(0), FibonacciRecursive(0+1)); }
-      (FibonacciRecursive(0), FibonacciRecursive(0+1));
+        { assert Fibonacci_Recursive(0) == 0; }
+        { assert Fibonacci_Recursive(0+1) == 1; }
+        { assert (0, 1) == (Fibonacci_Recursive(0), Fibonacci_Recursive(0+1)); }
+      (Fibonacci_Recursive(0), Fibonacci_Recursive(0+1));
     }
   } else {
     calc == {
-      FibonacciRecursivePairAux(n);
+      Fibonacci_RecursivePairAux(n);
         { assert n > 0; }
     }
-    match FibonacciRecursivePairAux(n-1) {
+    match Fibonacci_RecursivePairAux(n-1) {
       case (f, f') =>
         calc == {
           (f', f+f');
