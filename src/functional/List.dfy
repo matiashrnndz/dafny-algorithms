@@ -80,15 +80,17 @@ function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
 function method List_Head(list:List<T>) : (head:T)
   requires list != List_Empty
 {
-  match list
+  match list {
     case Cons(head, tail) => head
+  }
 }
 
 function method List_Tail(list:List<T>) : (tail:List<T>)
 {
-  match list
+  match list {
     case List_Empty => List_Empty
     case Cons(head, tail) => tail
+  }
 }
 
 // ------------------------- Methods -------------------------- //

@@ -90,10 +90,10 @@ function method BST_ToMultiset(tree:BST<T>) : multiset<T>
 function method BST_Size(tree:BST<T>) : (n:int)
   decreases tree
 {
-    match tree {
-      case Leaf => 0
-      case Node(left, x, right) => BST_Size(left) + 1 + BST_Size(right)
-    }
+  match tree {
+    case Leaf => 0
+    case Node(left, x, right) => BST_Size(left) + 1 + BST_Size(right)
+  }
 }
 
 // ---------------------- Predicates ---------------------- //
@@ -103,7 +103,7 @@ predicate bst_is_ordered(tree:BST<T>)
 {
   match tree {
     case Leaf => true
-    case Node(left, x, right) => 
+    case Node(left, x, right) =>
       bst_is_ordered(left) &&
       bst_is_ordered(right) &&
       bst_upper_bound(left, x) &&
