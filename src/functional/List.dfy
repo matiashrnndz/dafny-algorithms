@@ -17,10 +17,10 @@ function method List_Size(list:List<T>) : nat
 }
 
 /** Properties:
-
-  Lemma_ListInsertSameElemsPlusInserted(list, x)
-    ==> ensures List_ToMultiset(List_Insert(list, d)) == List_ToMultiset(list) + multiset{d}
-
+ *
+ *  Lemma_ListInsertSameElemsPlusInserted(list, x)
+ *    ==> ensures List_ToMultiset(List_Insert(list, d)) == List_ToMultiset(list) + multiset{d}
+ *
  */
 function method List_Insert(list:List<T>, d:T) : List<T>
   decreases list
@@ -33,31 +33,31 @@ function method List_Insert(list:List<T>, d:T) : List<T>
 
 
 /** Properties:
-
-  Lemma_ConcatSameElems(a, b)
-    ==> ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
-
-  Lemma_ListConcatSameSize(a, b)
-    ==> ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
-
-  Lemma_ListConcatOfEmptyLists(List_Empty, List_Empty)
-    ==> ensures List_Concat(a, b) == List_Empty
-
-  Lemma_ListConcatFirstListEmpty(List_Empty, b)
-    ==> ensures List_Concat(List_Empty, b) == b
-
-  Lemma_ListConcatSecondListEmpty(a, List_Empty)
-    ==> ensures List_Concat(a, List_Empty) == a
-
-  Lemma_ListConcatSortedWithMiddleElement(a, x, b)
-    ==> ensures list_is_ordered(List_Concat(a, Cons(x, b)))
-
-  Lemma_IfElemUpperBoundOfTwoListsThenIsUpperBoundOfConcat(a, b, d, x)
-    ==> ensures list_upper_bound(List_Concat(a, Cons(x, b)), d)
-
-  Lemma_IfElemLowerBoundOfTwoListsThenIsLowerBoundOfConcat(a, b, d, x)
-    ==> ensures list_lower_bound(List_Concat(a, Cons(x, b)), d)
-
+ *
+ *  Lemma_ConcatSameElems(a, b)
+ *    ==> ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
+ *
+ *  Lemma_ListConcatSameSize(a, b)
+ *    ==> ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
+ *
+ *  Lemma_ListConcatOfEmptyLists(List_Empty, List_Empty)
+ *    ==> ensures List_Concat(a, b) == List_Empty
+ *
+ *  Lemma_ListConcatFirstListEmpty(List_Empty, b)
+ *    ==> ensures List_Concat(List_Empty, b) == b
+ *
+ *  Lemma_ListConcatSecondListEmpty(a, List_Empty)
+ *    ==> ensures List_Concat(a, List_Empty) == a
+ *
+ *  Lemma_ListConcatSortedWithMiddleElement(a, x, b)
+ *    ==> ensures list_is_ordered(List_Concat(a, Cons(x, b)))
+ *
+ *  Lemma_IfElemUpperBoundOfTwoListsThenIsUpperBoundOfConcat(a, b, d, x)
+ *    ==> ensures list_upper_bound(List_Concat(a, Cons(x, b)), d)
+ *
+ *  Lemma_IfElemLowerBoundOfTwoListsThenIsLowerBoundOfConcat(a, b, d, x)
+ *    ==> ensures list_lower_bound(List_Concat(a, Cons(x, b)), d)
+ *
  */
 function method List_Concat(a:List<T>, b:List<T>) : List<T>
   decreases a

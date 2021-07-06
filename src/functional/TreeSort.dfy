@@ -1,13 +1,13 @@
 include "./BST.dfy"
 
 /** Properties:
-
-  Lemma_TreeSortListIsOrdered(list)
-    ==> ensures list_is_ordered(TreeSort(list))
-
-  Lemma_TreeSortSameElemsThanList
-    ==> ensures List_ToMultiset(TreeSort(list)) == List_ToMultiset(list)
-
+ *
+ *  Lemma_TreeSortListIsOrdered(list)
+ *    ==> ensures list_is_ordered(TreeSort(list))
+ *
+ *  Lemma_TreeSortSameElemsThanList
+ *    ==> ensures List_ToMultiset(TreeSort(list)) == List_ToMultiset(list)
+ *
  */
 function method TreeSort(list:List<int>) : (sortedList:List<int>)
   decreases list

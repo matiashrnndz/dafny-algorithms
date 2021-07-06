@@ -13,12 +13,12 @@ function method Fibonacci_Recursive(n: nat): nat
 
 
 /** Properties:
-
-  Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n: nat, i: nat)
-    ==> Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) == Fibonacci_Recursive(n)
-
-  Note: Initial call should be with f=0 and f'=1
-
+ *
+ *  Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n: nat, i: nat)
+ *    ==> Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) == Fibonacci_Recursive(n)
+ *
+ *  Note: Initial call should be with f=0 and f'=1
+ *
  */
 function method Fibonacci_TailRecursive(n: nat, f: nat, f': nat): nat
   decreases n
@@ -30,10 +30,10 @@ function method Fibonacci_TailRecursive(n: nat, f: nat, f': nat): nat
 // --------------- Fibonacci :: Recursive Pair --------------- //
 
 /** Properties:
-
-  Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n) 
-    ==> ensures Fibonacci_RecursivePair(n) == Fibonacci_Recursive(n)
-
+ *
+ *  Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n) 
+ *    ==> ensures Fibonacci_RecursivePair(n) == Fibonacci_Recursive(n)
+ *
  */
 function method Fibonacci_RecursivePair(n: nat): nat
 {
@@ -43,10 +43,10 @@ function method Fibonacci_RecursivePair(n: nat): nat
 }
 
 /** Properties:
-
-  Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n) 
-    ==> ensures Fibonacci_RecursivePairAux(n) == (Fibonacci_Recursive(n), Fibonacci_Recursive(n+1))
-
+ *
+ *  Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n) 
+ *    ==> ensures Fibonacci_RecursivePairAux(n) == (Fibonacci_Recursive(n), Fibonacci_Recursive(n+1))
+ *
  */
 function method Fibonacci_RecursivePairAux(n: nat): (nat, nat)
   decreases n

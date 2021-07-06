@@ -8,19 +8,19 @@ datatype BST<T> = Leaf | Node(left:BST<T>, data:T, right:BST<T>)
 // ---------------------- Function Methods ---------------------- //
 
 /** Properties:
-
-  Lemma_BSTInsertOrdered(tree, d)
-    ==> ensures bst_is_ordered(BST_Insert(tree, d))
-
-  Lemma_BSTInsertUpperBound(tree, d, b)
-    ==> ensures bst_upper_bound(BST_Insert(tree, d), b)
-
-  Lemma_BSTInsertLowerBound(tree, d, b)
-    ==> ensures bst_lower_bound(BST_Insert(tree, d), b)
-
-  Lemma_BSTInsertSameElemsPlusInserted(tree, d)
-    ==> ensures BST_ToMultiset(tree) + multiset{d} == BST_ToMultiset(BST_Insert(tree, d))
-
+ *
+ *  Lemma_BSTInsertSameElemsPlusInserted(tree, d)
+ *    ==> ensures BST_ToMultiset(tree) + multiset{d} == BST_ToMultiset(BST_Insert(tree, d))
+ *
+ *  Lemma_BSTInsertOrdered(tree, d)
+ *    ==> ensures bst_is_ordered(BST_Insert(tree, d))
+ *
+ *  Lemma_BSTInsertUpperBound(tree, d, b)
+ *    ==> ensures bst_upper_bound(BST_Insert(tree, d), b)
+ *
+ *  Lemma_BSTInsertLowerBound(tree, d, b)
+ *    ==> ensures bst_lower_bound(BST_Insert(tree, d), b)
+ *
  */
 function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
   decreases tree
@@ -36,19 +36,19 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
 }
 
 /** Properties:
-
-  Lemma_BSTSameElementsThanInOrder(tree)
-    ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
-
-  Lemma_BSTOrderedThenInOrderOrdered(tree)
-    ==> ensures list_is_ordered(BST_InOrder(tree))
-
-  Lemma_BSTUpperBoundThenInOrderUpperBound(tree, d)
-    ==> ensures list_upper_bound(BST_InOrder(tree), d)
-
-  Lemma_BSTLowerBoundThenInOrderLowerBound(tree, d)
-    ==> ensures list_lower_bound(BST_InOrder(tree), d)
-
+ *
+ *  Lemma_BSTSameElementsThanInOrder(tree)
+ *    ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
+ *
+ *  Lemma_BSTOrderedThenInOrderOrdered(tree)
+ *    ==> ensures list_is_ordered(BST_InOrder(tree))
+ *
+ *  Lemma_BSTUpperBoundThenInOrderUpperBound(tree, d)
+ *    ==> ensures list_upper_bound(BST_InOrder(tree), d)
+ *
+ *  Lemma_BSTLowerBoundThenInOrderLowerBound(tree, d)
+ *    ==> ensures list_lower_bound(BST_InOrder(tree), d)
+ *
  */
 function method BST_InOrder(tree:BST<T>) : (result:List<T>)
   decreases tree
@@ -61,13 +61,13 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
 }
 
 /** Properties:
-
-  Lemma_BSTLoadIsOrdered(list)
-    ==> ensures bst_is_ordered(BST_Load(list))
-
-  Lemma_BSTLoadTreeElemsSameThanList(list:List<T>)
-    ==> ensures List_ToMultiset(list) == BST_ToMultiset(BST_Load(list))
-
+ *
+ *  Lemma_BSTLoadIsOrdered(list)
+ *    ==> ensures bst_is_ordered(BST_Load(list))
+ *
+ *  Lemma_BSTLoadTreeElemsSameThanList(list:List<T>)
+ *    ==> ensures List_ToMultiset(list) == BST_ToMultiset(BST_Load(list))
+ *
  */
 function method BST_Load(list:List<T>) : (tree:BST<T>)
   decreases list
@@ -84,15 +84,6 @@ function method BST_ToMultiset(tree:BST<T>) : multiset<T>
   match tree {
     case Leaf => multiset{}
     case Node(left, x, right) => multiset{x} + BST_ToMultiset(left) + BST_ToMultiset(right)
-  }
-}
-
-function method BST_Size(tree:BST<T>) : (n:int)
-  decreases tree
-{
-  match tree {
-    case Leaf => 0
-    case Node(left, x, right) => BST_Size(left) + 1 + BST_Size(right)
   }
 }
 
@@ -130,6 +121,56 @@ predicate bst_upper_bound(tree:BST<T>, d:T)
 }
 
 // ------------------------ Lemmas ------------------------ //
+
+lemma {:induction tree} Lemma_BSTInsertSameElemsPlusInserted(tree:BST<T>, d:T)
+  ensures BST_ToMultiset(BST_Insert(tree, d)) == BST_ToMultiset(tree) + multiset{d}
+  decreases tree
+{
+  match tree {
+    case Leaf => 
+      calc == {
+        BST_ToMultiset(BST_Insert(tree, d));
+          { assert tree == Leaf; }
+        BST_ToMultiset(BST_Insert(Leaf, d));
+          { assert BST_Insert(Leaf, d) == Node(Leaf, d, Leaf); }
+        BST_ToMultiset(Node(Leaf, d, Leaf));
+          { assert BST_ToMultiset(Node(Leaf, d, Leaf)) == BST_ToMultiset(Leaf) + multiset{d} + BST_ToMultiset(Leaf); }
+        BST_ToMultiset(Leaf) + multiset{d} + BST_ToMultiset(Leaf);
+          { assert BST_ToMultiset(Leaf) == multiset{}; }
+        BST_ToMultiset(Leaf) + multiset{d} + multiset{};
+          { assert multiset{d} + multiset{} == multiset{d}; }
+        BST_ToMultiset(Leaf) + multiset{d}; 
+          { assert Leaf == tree; }
+        BST_ToMultiset(tree) + multiset{d};
+      }
+    case Node(left, x, right) =>
+      calc == {
+        BST_ToMultiset(BST_Insert(tree, d));
+          { assert tree == Node(left, x, right); }
+        BST_ToMultiset(BST_Insert(Node(left, x, right), d));
+        { if (d < x) {
+          calc == {
+            BST_ToMultiset(BST_Insert(Node(left, x, right), d));
+              { assert BST_Insert(Node(left, x, right), d) == Node(BST_Insert(left, d), x , right); }
+            BST_ToMultiset(Node(BST_Insert(left, d), x , right));
+              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right); }
+            BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right);
+              { Lemma_BSTInsertSameElemsPlusInserted(left, d); }
+          }
+        } else {
+          calc == {
+            BST_ToMultiset(BST_Insert(Node(left, x, right), d));
+              { assert BST_Insert(Node(left, x, right), d) == Node(left, x, BST_Insert(right, d)); }
+            BST_ToMultiset(Node(left, x, BST_Insert(right, d)));
+              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d)); }
+            BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d));
+              { Lemma_BSTInsertSameElemsPlusInserted(right, d); }
+          }
+        } }
+        BST_ToMultiset(tree) + multiset{d};
+      }
+  }
+}
 
 lemma {:induction tree} Lemma_BSTInsertOrdered(tree:BST<T>, d:T)
   requires bst_is_ordered(tree)
@@ -379,56 +420,6 @@ lemma {:induction tree} Lemma_BSTLowerBoundThenInOrderLowerBound(tree:BST<T>, d:
             { Lemma_IfElemLowerBoundOfTwoListsThenIsLowerBoundOfConcat(BST_InOrder(left), BST_InOrder(right), d, x); }
           true;
         }
-  }
-}
-
-lemma {:induction tree} Lemma_BSTInsertSameElemsPlusInserted(tree:BST<T>, d:T)
-  ensures BST_ToMultiset(BST_Insert(tree, d)) == BST_ToMultiset(tree) + multiset{d}
-  decreases tree
-{
-  match tree {
-    case Leaf => 
-      calc == {
-        BST_ToMultiset(BST_Insert(tree, d));
-          { assert tree == Leaf; }
-        BST_ToMultiset(BST_Insert(Leaf, d));
-          { assert BST_Insert(Leaf, d) == Node(Leaf, d, Leaf); }
-        BST_ToMultiset(Node(Leaf, d, Leaf));
-          { assert BST_ToMultiset(Node(Leaf, d, Leaf)) == BST_ToMultiset(Leaf) + multiset{d} + BST_ToMultiset(Leaf); }
-        BST_ToMultiset(Leaf) + multiset{d} + BST_ToMultiset(Leaf);
-          { assert BST_ToMultiset(Leaf) == multiset{}; }
-        BST_ToMultiset(Leaf) + multiset{d} + multiset{};
-          { assert multiset{d} + multiset{} == multiset{d}; }
-        BST_ToMultiset(Leaf) + multiset{d}; 
-          { assert Leaf == tree; }
-        BST_ToMultiset(tree) + multiset{d};
-      }
-    case Node(left, x, right) =>
-      calc == {
-        BST_ToMultiset(BST_Insert(tree, d));
-          { assert tree == Node(left, x, right); }
-        BST_ToMultiset(BST_Insert(Node(left, x, right), d));
-        { if (d < x) {
-          calc == {
-            BST_ToMultiset(BST_Insert(Node(left, x, right), d));
-              { assert BST_Insert(Node(left, x, right), d) == Node(BST_Insert(left, d), x , right); }
-            BST_ToMultiset(Node(BST_Insert(left, d), x , right));
-              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right); }
-            BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right);
-              { Lemma_BSTInsertSameElemsPlusInserted(left, d); }
-          }
-        } else {
-          calc == {
-            BST_ToMultiset(BST_Insert(Node(left, x, right), d));
-              { assert BST_Insert(Node(left, x, right), d) == Node(left, x, BST_Insert(right, d)); }
-            BST_ToMultiset(Node(left, x, BST_Insert(right, d)));
-              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d)); }
-            BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d));
-              { Lemma_BSTInsertSameElemsPlusInserted(right, d); }
-          }
-        } }
-        BST_ToMultiset(tree) + multiset{d};
-      }
   }
 }
 

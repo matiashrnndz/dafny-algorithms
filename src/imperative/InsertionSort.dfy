@@ -1,11 +1,11 @@
 include "../functional/Sorted.dfy"
 
 /** Explicación:
-
-  invariant forall m, n :: 0 <= m < n < i+1 && n != j ==> A[m] <= A[n]
-    A está ordenado para cada par de elementos 
-    excepto para los que el índice del segundo elemento sea igual a j
-
+ *
+ *  invariant forall m, n :: 0 <= m < n < i+1 && n != j ==> A[m] <= A[n]
+ *    A está ordenado para cada par de elementos 
+ *    excepto para los que el índice del segundo elemento sea igual a j
+ *
  */
 method InsertionSort(A:array<int>)
   modifies A

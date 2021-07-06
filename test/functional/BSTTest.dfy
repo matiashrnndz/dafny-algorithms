@@ -1,18 +1,10 @@
 include "../../src/functional/BST.dfy"
 
 method Main() {
-  Test_Size();
   Test_Insert();
   Test_InOrder();
   Test_InsertWorstCase();
   Test_ToMultiset();
-}
-
-method Test_Size() {
-  var tree: BST<int> := Node(Node(Node(Leaf,1,Leaf),3,Leaf),4,Node(Node(Leaf, 5, Leaf),7,Leaf));
-  var size: int := BST_Size(tree);
-  var expected: int := 5;
-  assert size == expected;
 }
 
 method Test_InOrder() {
