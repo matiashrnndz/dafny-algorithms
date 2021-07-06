@@ -10,8 +10,3 @@ predicate sorted(A:array<int>)
 {
     sorted_between(A, 0, A.Length-1)
 }
-
-predicate sorted_seq(s:seq<int>)
-{
-   forall i, j :: 0 <= i <= j < |s| ==> s[i] <= s[j]
-}

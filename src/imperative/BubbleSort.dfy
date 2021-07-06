@@ -26,7 +26,6 @@ method BubbleSort(A:array<int>)
     invariant forall n, m :: 0 <= n <= i < m < N ==> A[n] <= A[m]
     decreases i
   {
-    print A[..], "\n";
     var j := 0;
     while j < i
       invariant 0 < i < N
@@ -40,11 +39,9 @@ method BubbleSort(A:array<int>)
       if A[j] > A[j+1]
       {
           A[j], A[j+1] := A[j+1], A[j];
-          print A[..], "\n";
       }
       j := j+1;
     } 
     i := i-1;
-    print "\n";
   }
 }

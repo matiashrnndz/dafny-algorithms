@@ -21,7 +21,6 @@ method InsertionSort(A:array<int>)
     invariant sorted_between(A, 0, i-1)
     decreases N-i
   {
-    print A[..], "\n";
     var j := i;
     while j > 0 && A[j-1] > A[j] 
       invariant 1 <= i <= N-1
@@ -32,10 +31,8 @@ method InsertionSort(A:array<int>)
     {
       A[j], A[j-1] := A[j-1], A[j];
       j := j-1;
-      print A[..], "\n";
     }
     i := i+1;
-    print "\n";
   }
 }
 
