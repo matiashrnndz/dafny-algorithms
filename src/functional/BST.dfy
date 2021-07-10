@@ -12,7 +12,7 @@ datatype BST<T> = Leaf | Node(left:BST<T>, data:T, right:BST<T>)
  *  Lemma_BSTInsertSameElemsPlusInserted(tree, d)
  *    ==> ensures BST_ToMultiset(tree) + multiset{d} == BST_ToMultiset(BST_Insert(tree, d))
  *
- *  Lemma_BSTInsertOrdered(tree, d)
+ *  Lemma_BSTInsertIsOrdered(tree, d)
  *    ==> ensures bst_is_ordered(BST_Insert(tree, d))
  *
  *  Lemma_BSTInsertUpperBound(tree, d, b)
@@ -172,7 +172,7 @@ lemma {:induction tree} Lemma_BSTInsertSameElemsPlusInserted(tree:BST<T>, d:T)
   }
 }
 
-lemma {:induction tree} Lemma_BSTInsertOrdered(tree:BST<T>, d:T)
+lemma {:induction tree} Lemma_BSTInsertIsOrdered(tree:BST<T>, d:T)
   requires bst_is_ordered(tree)
   ensures bst_is_ordered(BST_Insert(tree, d))
   decreases tree
@@ -197,7 +197,7 @@ lemma {:induction tree} Lemma_BSTInsertOrdered(tree:BST<T>, d:T)
             bst_is_ordered(Node(BST_Insert(left, d), x, right));
               { Lemma_BSTInsertUpperBound(left, d, x); }
               { assert bst_upper_bound(BST_Insert(left, d), x); }
-              { Lemma_BSTInsertOrdered(left, d); }
+              { Lemma_BSTInsertIsOrdered(left, d); }
             bst_is_ordered(Node(Leaf, d, Leaf));
           }
         } else {
@@ -205,7 +205,7 @@ lemma {:induction tree} Lemma_BSTInsertOrdered(tree:BST<T>, d:T)
             bst_is_ordered(Node(left, x, BST_Insert(right, d)));
               { Lemma_BSTInsertLowerBound(right, d, x); }
               { assert bst_lower_bound(BST_Insert(right, d), x); }
-              { Lemma_BSTInsertOrdered(right, d); }
+              { Lemma_BSTInsertIsOrdered(right, d); }
             bst_is_ordered(Node(Leaf, d, Leaf));
           }
         } }
@@ -445,7 +445,7 @@ lemma {:induction list} Lemma_BSTLoadIsOrdered(list:List<T>)
         bst_is_ordered(BST_Load(Cons(head, tail)));
           { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
         bst_is_ordered(BST_Insert(BST_Load(tail), head));
-          { Lemma_BSTInsertOrdered(BST_Load(tail), head); }
+          { Lemma_BSTInsertIsOrdered(BST_Load(tail), head); }
         true;
       }
   }

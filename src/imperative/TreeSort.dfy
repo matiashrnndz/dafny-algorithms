@@ -13,7 +13,7 @@ method TreeSort(L:List<int>) returns (sortedList:List<int>)
     decreases list
   {
     var elem := List_Head(list);
-    Lemma_BSTInsertOrdered(tree, elem);
+    Lemma_BSTInsertIsOrdered(tree, elem);
     tree := BST_Insert(tree, elem);
     list := List_Tail(list);
   }
