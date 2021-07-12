@@ -40,7 +40,7 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
  *  Lemma_BSTSameElementsThanInOrder(tree)
  *    ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
  *
- *  Lemma_BSTOrderedThenInOrderOrdered(tree)
+ *  Lemma_BSTInOrderOrdered(tree)
  *    ==> ensures list_is_ordered(BST_InOrder(tree))
  *
  *  Lemma_BSTUpperBoundThenInOrderUpperBound(tree, d)
@@ -330,7 +330,7 @@ lemma {:induction tree} Lemma_BSTSameElementsThanInOrder(tree:BST<T>)
   }
 }
 
-lemma {:induction tree} Lemma_BSTOrderedThenInOrderOrdered(tree:BST<T>)
+lemma {:induction tree} Lemma_BSTInOrderOrdered(tree:BST<T>)
   requires bst_is_ordered(tree)
   ensures list_is_ordered(BST_InOrder(tree))
 {

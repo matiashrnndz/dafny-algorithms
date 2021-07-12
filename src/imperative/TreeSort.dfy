@@ -18,7 +18,7 @@ method TreeSort(L:List<int>) returns (sortedList:List<int>)
     list := List_Tail(list);
   }
 
-  Lemma_BSTOrderedThenInOrderOrdered(tree);
+  Lemma_BSTInOrderOrdered(tree);
   sortedList := BST_InOrder(tree);
 
   return sortedList;

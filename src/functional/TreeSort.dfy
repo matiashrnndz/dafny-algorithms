@@ -24,7 +24,7 @@ lemma {:induction list} Lemma_TreeSortListIsOrdered(list:List<T>)
     list_is_ordered(BST_InOrder(BST_Load(list)));
       { Lemma_BSTLoadIsOrdered(list); }
       { assert bst_is_ordered(BST_Load(list)); }
-      { Lemma_BSTOrderedThenInOrderOrdered(BST_Load(list)); }
+      { Lemma_BSTInOrderOrdered(BST_Load(list)); }
     true;
   }
 }
