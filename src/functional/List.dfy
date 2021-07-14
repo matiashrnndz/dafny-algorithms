@@ -272,29 +272,15 @@ lemma {:induction a, b} Lemma_ListConcatSortedWithMiddleElement(a:List<T>, x:T, 
 {
   match a {
     case List_Empty =>
-      match b {
-        case List_Empty =>
-          calc == {
-            list_is_ordered(List_Concat(a, Cons(x, b)));
-              { assert a == List_Empty; }
-              { assert b == List_Empty; }
-            list_is_ordered(List_Concat(List_Empty, Cons(x, List_Empty)));
-              { Lemma_ListConcatOfEmptyLists(List_Empty, List_Empty); }
-            list_is_ordered(List_Empty);
-              { assert list_is_ordered(List_Empty) == true; }
-            true;
-          }
-        case Cons(hb, tb) =>
-          calc == {
-            list_is_ordered(List_Concat(a, Cons(x, b)));
-              { assert a == List_Empty; }
-            list_is_ordered(List_Concat(List_Empty, Cons(x, b)));
-              { Lemma_ListConcatFirstListEmpty(List_Empty, b); }
-            list_is_ordered(Cons(x, b));
-              { assert list_lower_bound(b, x); }
-              { assert list_is_ordered(b); }
-            true;
-          }
+      calc == {
+        list_is_ordered(List_Concat(a, Cons(x, b)));
+          { assert a == List_Empty; }
+        list_is_ordered(List_Concat(List_Empty, Cons(x, b)));
+          { Lemma_ListConcatFirstListEmpty(List_Empty, b); }
+        list_is_ordered(Cons(x, b));
+          { assert list_lower_bound(b, x); }
+          { assert list_is_ordered(b); }
+        true;
       }
     case Cons(ha, ta) =>
       match ta {
