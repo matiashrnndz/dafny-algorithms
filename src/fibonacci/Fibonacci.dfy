@@ -17,14 +17,14 @@ function method Fibonacci_Recursive(n: nat): nat
  *  Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n: nat, i: nat)
  *    ==> Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) == Fibonacci_Recursive(n)
  *
- *  Note: Initial call should be with f=0 and f'=1
+ *  Note: Initial call should be with a=0 and b=1
  *
  */
-function method Fibonacci_TailRecursive(n: nat, f: nat, f': nat): nat
+function method Fibonacci_TailRecursive(n: nat, a: nat, b: nat): nat
   decreases n
 {
-  if (n == 0) then f else
-  Fibonacci_TailRecursive(n-1, f', f+f')
+  if (n == 0) then a else
+  Fibonacci_TailRecursive(n-1, b, a+b)
 }
 
 // --------------- Fibonacci :: Recursive Pair --------------- //
@@ -38,7 +38,7 @@ function method Fibonacci_TailRecursive(n: nat, f: nat, f': nat): nat
 function method Fibonacci_RecursivePair(n: nat): nat
 {
   match Fibonacci_RecursivePairAux(n) {
-    case (f, f') => f
+    case (a, b) => a
   }
 }
 
@@ -53,26 +53,26 @@ function method Fibonacci_RecursivePairAux(n: nat): (nat, nat)
 {
   if (n == 0) then (0, 1) else
   match Fibonacci_RecursivePairAux(n-1) {
-    case (f, f') => (f', f+f')
+    case (a, b) => (b, a+b)
   }
 }
 
 // ------------------ Fibonacci :: Iterative ------------------ //
 
-method Fibonacci_Iterative(n: nat) returns (f: nat)
-  ensures f == Fibonacci_Recursive(n)
+method Fibonacci_Iterative(n: nat) returns (a: nat)
+  ensures a == Fibonacci_Recursive(n)
 {
-  f := 0;
-  var f': nat := 1;
+  a := 0;
+  var b: nat := 1;
   var i: nat := 0;
 
   while i < n
     invariant 0 <= i <= n
-    invariant f == Fibonacci_Recursive(i)
-    invariant f' == Fibonacci_Recursive(i+1)
+    invariant a == Fibonacci_Recursive(i)
+    invariant b == Fibonacci_Recursive(i+1)
     decreases n-i
   {
-    f, f' := f', f+f';
+    a, b := b, a+b;
     i := i+1;
   }
 }
@@ -112,9 +112,9 @@ lemma {:induction n} Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n: 
         { assert n > 0; }
     }
     match Fibonacci_RecursivePairAux(n-1) {
-      case (f, f') =>
+      case (a, b) =>
         calc == {
-          (f', f+f');
+          (b, a+b);
           { Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n-1); }
         }
     }
