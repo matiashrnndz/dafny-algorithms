@@ -35,4 +35,3 @@ method InsertionSort(A:array<int>)
     i := i+1;
   }
 }
-

@@ -2,10 +2,10 @@ include "./BST.dfy"
 
 /** Properties:
  *
- *  Lemma_TreeSortListIsOrdered(list)
- *    ==> ensures list_is_ordered(TreeSort(list))
+ *  Lemma_TreeSortOrdering(list)
+ *    ==> ensures list_ordered(TreeSort(list))
  *
- *  Lemma_TreeSortSameElemsThanList
+ *  Lemma_TreeSortIntegrity
  *    ==> ensures List_ToMultiset(TreeSort(list)) == List_ToMultiset(list)
  *
  */
@@ -15,32 +15,32 @@ function method TreeSort(list:List<int>) : (sortedList:List<int>)
   BST_InOrder(BST_Load(list))
 }
 
-lemma {:induction list} Lemma_TreeSortListIsOrdered(list:List<T>)
-  ensures list_is_ordered(TreeSort(list))
+lemma {:induction list} Lemma_TreeSortOrdering(list:List<T>)
+  ensures list_ordered(TreeSort(list))
 {
   calc == {
-    list_is_ordered(TreeSort(list));
+    list_ordered(TreeSort(list));
       { assert TreeSort(list) == BST_InOrder(BST_Load(list)); }
-    list_is_ordered(BST_InOrder(BST_Load(list)));
-      { Lemma_BSTLoadIsOrdered(list); }
-      { assert bst_is_ordered(BST_Load(list)); }
-      { Lemma_BSTInOrderOrdered(BST_Load(list)); }
+    list_ordered(BST_InOrder(BST_Load(list)));
+      { Lemma_BSTLoadOrdering(list); }
+      { assert bst_ordered(BST_Load(list)); }
+      { Lemma_BSTInOrderOrdering(BST_Load(list)); }
     true;
   }
 }
 
-lemma {:induction list} Lemma_TreeSortSameElemsThanList(list:List<T>)
+lemma {:induction list} Lemma_TreeSortIntegrity(list:List<T>)
   ensures List_ToMultiset(TreeSort(list)) == List_ToMultiset(list)
 {
   calc == {
     List_ToMultiset(TreeSort(list));
       { assert TreeSort(list) == BST_InOrder(BST_Load(list)); }
     List_ToMultiset(BST_InOrder(BST_Load(list)));
-      { Lemma_BSTLoadIsOrdered(list); }
-      { assert bst_is_ordered(BST_Load(list)); }
-      { Lemma_BSTSameElementsThanInOrder(BST_Load(list)); }
+      { Lemma_BSTLoadOrdering(list); }
+      { assert bst_ordered(BST_Load(list)); }
+      { Lemma_InOrderIntegrity(BST_Load(list)); }
     BST_ToMultiset(BST_Load(list));
-      { Lemma_BSTLoadTreeElemsSameThanList(list); }
+      { Lemma_BSTLoadIntegrity(list); }
     List_ToMultiset(list);
   }
 }

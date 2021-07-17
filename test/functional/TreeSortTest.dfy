@@ -2,8 +2,8 @@ include "../../src/functional/TreeSort.dfy"
 
 method Main() {
   Test_TreeSort();
-  Test_Lemma_TreeSortListIsOrdered();
-  Test_Lemma_TreeSortSameElemsThanList();
+  Test_Lemma_TreeSortOrdering();
+  Test_Lemma_TreeSortIntegrity();
 }
 
 method Test_TreeSort() {
@@ -13,14 +13,14 @@ method Test_TreeSort() {
   assert expected == sorted;
 }
 
-method Test_Lemma_TreeSortListIsOrdered() {
+method Test_Lemma_TreeSortOrdering() {
   var list := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
-  { Lemma_TreeSortListIsOrdered(list); }
-  assert list_is_ordered(TreeSort(list));
+  { Lemma_TreeSortOrdering(list); }
+  assert list_ordered(TreeSort(list));
 }
 
-method Test_Lemma_TreeSortSameElemsThanList() {
+method Test_Lemma_TreeSortIntegrity() {
   var list := Cons(2, Cons(10, Cons(4, Cons(12, Cons(7, List_Empty)))));
-  { Lemma_TreeSortSameElemsThanList(list); }
+  { Lemma_TreeSortIntegrity(list); }
   assert List_ToMultiset(TreeSort(list)) == List_ToMultiset(list);
 }

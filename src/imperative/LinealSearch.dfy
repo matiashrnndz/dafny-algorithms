@@ -24,5 +24,3 @@ method LinealSearch(A:array<int>, key:int) returns (index:int)
   }
   return -1;
 }
-
-
