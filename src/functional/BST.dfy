@@ -70,7 +70,7 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
 
 /** Properties:
  *
- *  Lemma_InOrderIntegrity(tree)
+ *  Lemma_BSTInOrderIntegrity(tree)
  *    ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
  *
  *  Lemma_BSTInOrderOrdering(tree)
@@ -95,11 +95,11 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
 
 /** Properties:
  *
- *  Lemma_BSTLoadOrdering(list)
- *    ==> ensures bst_ordered(BST_Load(list))
- *
  *  Lemma_BSTLoadIntegrity(list:List<T>)
  *    ==> ensures List_ToMultiset(list) == BST_ToMultiset(BST_Load(list))
+ *
+*  Lemma_BSTLoadOrdering(list)
+ *    ==> ensures bst_ordered(BST_Load(list))
  *
  */
 function method BST_Load(list:List<T>) : (tree:BST<T>)
@@ -288,7 +288,7 @@ lemma {:induction tree} Lemma_BSTInsertLowerBound(tree:BST<T>, d:T, b:T)
 
 // ----------------------------------- BST_InOrder Lemmas --------------------------------------- //
 
-lemma {:induction tree} Lemma_InOrderIntegrity(tree:BST<T>)
+lemma {:induction tree} Lemma_BSTInOrderIntegrity(tree:BST<T>)
   requires bst_ordered(tree)
   ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
   decreases tree
@@ -325,8 +325,8 @@ lemma {:induction tree} Lemma_InOrderIntegrity(tree:BST<T>)
         List_ToMultiset(BST_InOrder(left)) + multiset{x} + multiset{} + List_ToMultiset(BST_InOrder(right));
           { assert multiset{x} + multiset{} == multiset{x}; }
         List_ToMultiset(BST_InOrder(left)) + multiset{x} + List_ToMultiset(BST_InOrder(right));
-          { Lemma_InOrderIntegrity(left); }
-          { Lemma_InOrderIntegrity(right); }
+          { Lemma_BSTInOrderIntegrity(left); }
+          { Lemma_BSTInOrderIntegrity(right); }
         BST_ToMultiset(tree);
       }
   }

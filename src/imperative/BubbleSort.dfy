@@ -1,4 +1,6 @@
-include "../functional/Sorted.dfy"
+include "./sorted.dfy"
+
+// ----------------------------------------- Methods -------------------------------------------- //
 
 /** Explicación:
  *

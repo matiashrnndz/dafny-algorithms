@@ -1,5 +1,5 @@
 
-// ------------------ Fibonacci :: Recursive ------------------ //
+// ----------------------------------- Fibonacci_Recursive -------------------------------------- //
 
 function method Fibonacci_Recursive(n: nat): nat
   decreases n
@@ -9,8 +9,7 @@ function method Fibonacci_Recursive(n: nat): nat
   Fibonacci_Recursive(n-2) + Fibonacci_Recursive(n-1)
 }
 
-// ---------------- Fibonacci :: Tail Recursive ---------------- //
-
+// --------------------------------- Fibonacci_TailRecursive ------------------------------------ //
 
 /** Properties:
  *
@@ -27,7 +26,7 @@ function method Fibonacci_TailRecursive(n: nat, a: nat, b: nat): nat
   Fibonacci_TailRecursive(n-1, b, a+b)
 }
 
-// --------------- Fibonacci :: Recursive Pair --------------- //
+// --------------------------------- Fibonacci_RecursivePair ------------------------------------ //
 
 /** Properties:
  *
@@ -57,7 +56,7 @@ function method Fibonacci_RecursivePairAux(n: nat): (nat, nat)
   }
 }
 
-// ------------------ Fibonacci :: Iterative ------------------ //
+// ----------------------------------- Fibonacci_Iterative -------------------------------------- //
 
 method Fibonacci_Iterative(n: nat) returns (a: nat)
   ensures a == Fibonacci_Recursive(n)
@@ -77,7 +76,35 @@ method Fibonacci_Iterative(n: nat) returns (a: nat)
   }
 }
 
-// ------------------------ Lemmas ------------------------ //
+// ------------------------------- Fibonacci_TailRecursive Lemmas ------------------------------- //
+
+lemma {:induction n, i} Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n: nat, i: nat)
+  requires 0 <= n
+  requires 0 <= i <= n
+  ensures Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) == Fibonacci_Recursive(n)
+  decreases n-i
+{
+  if (n-i == 0) {
+    calc == {
+      Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1));
+        { assert Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) == Fibonacci_Recursive(i); }
+      Fibonacci_Recursive(n);
+    }
+  } else {
+    calc == {
+      Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1));
+        { assert Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) 
+              == Fibonacci_TailRecursive(n-i-1, Fibonacci_Recursive(i+1), Fibonacci_Recursive(i) + Fibonacci_Recursive(i+1)); }
+      Fibonacci_TailRecursive(n-i-1, Fibonacci_Recursive(i+1), Fibonacci_Recursive(i) + Fibonacci_Recursive(i+1));
+        { assert Fibonacci_Recursive(i) + Fibonacci_Recursive(i+1) == Fibonacci_Recursive(i+2); }
+      Fibonacci_TailRecursive(n-i-1, Fibonacci_Recursive(i+1), Fibonacci_Recursive(i+2));
+        { Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n, i+1); }
+      Fibonacci_Recursive(n);
+    }
+  }
+}
+
+// ------------------------------- Fibonacci_RecursivePair Lemmas ------------------------------- //
 
 lemma {:induction n} Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n: nat)
   ensures Fibonacci_RecursivePair(n) == Fibonacci_Recursive(n)
@@ -117,32 +144,6 @@ lemma {:induction n} Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n: 
           (b, a+b);
           { Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n-1); }
         }
-    }
-  }
-}
-
-lemma {:induction n, i} Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n: nat, i: nat)
-  requires 0 <= n
-  requires 0 <= i <= n
-  ensures Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) == Fibonacci_Recursive(n)
-  decreases n-i
-{
-  if (n-i == 0) {
-    calc == {
-      Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1));
-        { assert Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) == Fibonacci_Recursive(i); }
-      Fibonacci_Recursive(n);
-    }
-  } else {
-    calc == {
-      Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1));
-        { assert Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) 
-              == Fibonacci_TailRecursive(n-i-1, Fibonacci_Recursive(i+1), Fibonacci_Recursive(i) + Fibonacci_Recursive(i+1)); }
-      Fibonacci_TailRecursive(n-i-1, Fibonacci_Recursive(i+1), Fibonacci_Recursive(i) + Fibonacci_Recursive(i+1));
-        { assert Fibonacci_Recursive(i) + Fibonacci_Recursive(i+1) == Fibonacci_Recursive(i+2); }
-      Fibonacci_TailRecursive(n-i-1, Fibonacci_Recursive(i+1), Fibonacci_Recursive(i+2));
-        { Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n, i+1); }
-      Fibonacci_Recursive(n);
     }
   }
 }
