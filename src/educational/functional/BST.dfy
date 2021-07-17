@@ -40,6 +40,15 @@ predicate bst_upper_bound(tree:BST<T>, d:T)
 
 // ------------------------------------ Function Methods ---------------------------------------- //
 
+function method BST_ToMultiset(tree:BST<T>) : multiset<T>
+  decreases tree
+{
+  match tree {
+    case Leaf => multiset{}
+    case Node(left, x, right) => multiset{x} + BST_ToMultiset(left) + BST_ToMultiset(right)
+  }
+}
+
 /** Properties:
  *
  *  Lemma_BSTInsertIntegrity(tree, d)
@@ -70,6 +79,24 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
 
 /** Properties:
  *
+ *  Lemma_BSTLoadIntegrity(list:List<T>)
+ *    ==> ensures List_ToMultiset(list) == BST_ToMultiset(BST_Load(list))
+ *
+*  Lemma_BSTLoadOrdering(list)
+ *    ==> ensures bst_ordered(BST_Load(list))
+ *
+ */
+function method BST_Load(list:List<T>) : (tree:BST<T>)
+  decreases list
+{
+  match list {
+    case List_Empty => Leaf
+    case Cons(head, tail) => BST_Insert(BST_Load(tail), head)
+  }
+}
+
+/** Properties:
+ *
  *  Lemma_BSTInOrderIntegrity(tree)
  *    ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
  *
@@ -90,33 +117,6 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
     case Leaf => List_Empty
     case Node(left, x, right) => 
       List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))
-  }
-}
-
-/** Properties:
- *
- *  Lemma_BSTLoadIntegrity(list:List<T>)
- *    ==> ensures List_ToMultiset(list) == BST_ToMultiset(BST_Load(list))
- *
-*  Lemma_BSTLoadOrdering(list)
- *    ==> ensures bst_ordered(BST_Load(list))
- *
- */
-function method BST_Load(list:List<T>) : (tree:BST<T>)
-  decreases list
-{
-  match list {
-    case List_Empty => Leaf
-    case Cons(head, tail) => BST_Insert(BST_Load(tail), head)
-  }
-}
-
-function method BST_ToMultiset(tree:BST<T>) : multiset<T>
-  decreases tree
-{
-  match tree {
-    case Leaf => multiset{}
-    case Node(left, x, right) => multiset{x} + BST_ToMultiset(left) + BST_ToMultiset(right)
   }
 }
 
@@ -286,10 +286,73 @@ lemma {:induction tree} Lemma_BSTInsertLowerBound(tree:BST<T>, d:T, b:T)
   }
 }
 
+// ------------------------------------- BST_Load Lemmas ---------------------------------------- //
+
+lemma {:induction list} Lemma_BSTLoadIntegrity(list:List<T>)
+  ensures BST_ToMultiset(BST_Load(list)) == List_ToMultiset(list)
+  decreases list
+{
+  match list {
+    case List_Empty =>
+      calc == {
+        BST_ToMultiset(BST_Load(list));
+          { assert list == List_Empty; }
+        BST_ToMultiset(BST_Load(List_Empty));
+          { assert BST_Load(List_Empty) == Leaf; }
+        BST_ToMultiset(Leaf);
+          { assert BST_ToMultiset(Leaf) == multiset{}; }
+        multiset{};
+          { assert multiset{} == List_ToMultiset(List_Empty); }
+        List_ToMultiset(List_Empty);
+          { assert List_Empty == list; }
+        List_ToMultiset(list);
+      }
+    case Cons(head, tail) =>
+      calc == {
+        BST_ToMultiset(BST_Load(list));
+          { assert list == Cons(head, tail); }
+        BST_ToMultiset(BST_Load(Cons(head, tail)));
+          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
+        BST_ToMultiset(BST_Insert(BST_Load(tail), head));
+          { Lemma_BSTInsertIntegrity(BST_Load(tail), head); }
+        BST_ToMultiset(BST_Load(tail)) + multiset{head};
+          { Lemma_BSTLoadIntegrity(tail); }
+        List_ToMultiset(list);
+      }
+  }
+}
+
+lemma {:induction list} Lemma_BSTLoadOrdering(list:List<T>)
+  ensures bst_ordered(BST_Load(list))
+  decreases list
+{
+  match list {
+    case List_Empty =>
+      calc == {
+        bst_ordered(BST_Load(list));
+          { assert list == List_Empty; }
+        bst_ordered(BST_Load(List_Empty));
+          { assert BST_Load(List_Empty) == Leaf; }
+        bst_ordered(Leaf);
+          { assert bst_ordered(Leaf) == true; }
+        true;
+      }
+    case Cons(head, tail) =>
+      calc == {
+        bst_ordered(BST_Load(list));
+          { assert list == Cons(head, tail); }
+        bst_ordered(BST_Load(Cons(head, tail)));
+          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
+        bst_ordered(BST_Insert(BST_Load(tail), head));
+          { Lemma_BSTInsertOrdering(BST_Load(tail), head); }
+        true;
+      }
+  }
+}
+
 // ----------------------------------- BST_InOrder Lemmas --------------------------------------- //
 
 lemma {:induction tree} Lemma_BSTInOrderIntegrity(tree:BST<T>)
-  requires bst_ordered(tree)
   ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
   decreases tree
 {
@@ -422,69 +485,5 @@ lemma {:induction tree} Lemma_BSTInOrderLowerBound(tree:BST<T>, d:T)
             { Lemma_ListConcatLowerBound(BST_InOrder(left), BST_InOrder(right), d, x); }
           true;
         }
-  }
-}
-
-// ------------------------------------- BST_Load Lemmas ---------------------------------------- //
-
-lemma {:induction list} Lemma_BSTLoadIntegrity(list:List<T>)
-  ensures BST_ToMultiset(BST_Load(list)) == List_ToMultiset(list)
-  decreases list
-{
-  match list {
-    case List_Empty =>
-      calc == {
-        BST_ToMultiset(BST_Load(list));
-          { assert list == List_Empty; }
-        BST_ToMultiset(BST_Load(List_Empty));
-          { assert BST_Load(List_Empty) == Leaf; }
-        BST_ToMultiset(Leaf);
-          { assert BST_ToMultiset(Leaf) == multiset{}; }
-        multiset{};
-          { assert multiset{} == List_ToMultiset(List_Empty); }
-        List_ToMultiset(List_Empty);
-          { assert List_Empty == list; }
-        List_ToMultiset(list);
-      }
-    case Cons(head, tail) =>
-      calc == {
-        BST_ToMultiset(BST_Load(list));
-          { assert list == Cons(head, tail); }
-        BST_ToMultiset(BST_Load(Cons(head, tail)));
-          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
-        BST_ToMultiset(BST_Insert(BST_Load(tail), head));
-          { Lemma_BSTInsertIntegrity(BST_Load(tail), head); }
-        BST_ToMultiset(BST_Load(tail)) + multiset{head};
-          { Lemma_BSTLoadIntegrity(tail); }
-        List_ToMultiset(list);
-      }
-  }
-}
-
-lemma {:induction list} Lemma_BSTLoadOrdering(list:List<T>)
-  ensures bst_ordered(BST_Load(list))
-  decreases list
-{
-  match list {
-    case List_Empty =>
-      calc == {
-        bst_ordered(BST_Load(list));
-          { assert list == List_Empty; }
-        bst_ordered(BST_Load(List_Empty));
-          { assert BST_Load(List_Empty) == Leaf; }
-        bst_ordered(Leaf);
-          { assert bst_ordered(Leaf) == true; }
-        true;
-      }
-    case Cons(head, tail) =>
-      calc == {
-        bst_ordered(BST_Load(list));
-          { assert list == Cons(head, tail); }
-        bst_ordered(BST_Load(Cons(head, tail)));
-          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
-        bst_ordered(BST_Insert(BST_Load(tail), head));
-          { Lemma_BSTInsertOrdering(BST_Load(tail), head); }
-        true;
-      }
   }
 }

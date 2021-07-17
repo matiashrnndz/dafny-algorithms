@@ -37,18 +37,12 @@ predicate list_upper_bound(list:List<T>, d:T)
 
 // ------------------------------------ Function Methods ---------------------------------------- //
 
-/** Properties:
- *
- *  Lemma_ListInsertIntegrity(list, x)
- *    ==> ensures List_ToMultiset(List_Insert(list, d)) == List_ToMultiset(list) + multiset{d}
- *
- */
-function method List_Insert(list:List<T>, d:T) : List<T>
+function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
   decreases list
 {
   match list {
-    case List_Empty => Cons(d, List_Empty)
-    case Cons(head, tail) => Cons(head, List_Insert(tail, d))
+    case List_Empty => multiset{}
+    case Cons(head, tail) => multiset{head} + List_ToMultiset(tail)
   }
 }
 
@@ -56,9 +50,6 @@ function method List_Insert(list:List<T>, d:T) : List<T>
  *
  *  Lemma_ListConcatIntegrity(a, b)
  *    ==> ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
- *
- *  Lemma_ListConcatSize(a, b)
- *    ==> ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
  *
  *  Lemma_ListConcatBothListEmpty(List_Empty, List_Empty)
  *    ==> ensures List_Concat(a, b) == List_Empty
@@ -82,58 +73,6 @@ function method List_Concat(a:List<T>, b:List<T>) : List<T>
   match a {
     case List_Empty => b
     case Cons(head, tail) => Cons(head, List_Concat(tail, b))
-  }
-}
-
-function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
-  decreases list
-{
-  match list {
-    case List_Empty => multiset{}
-    case Cons(head, tail) => multiset{head} + List_ToMultiset(tail)
-  }
-}
-
-function method List_Size(list:List<T>) : nat
-  decreases list
-{
-  match list {
-    case List_Empty => 0
-    case Cons(head, tail) => 1 + List_Size(tail)
-  }
-}
-
-// ------------------------------------ List_Insert Lemmas -------------------------------------- //
-
-lemma {:induction list} Lemma_ListInsertIntegrity(list:List<T>, d:T)
-  ensures List_ToMultiset(List_Insert(list, d)) == List_ToMultiset(list) + multiset{d}
-  decreases list
-{
-  match list {
-    case List_Empty =>
-      calc == {
-        List_ToMultiset(List_Insert(list, d));
-          { assert list == List_Empty; }
-        List_ToMultiset(List_Insert(List_Empty, d));
-          { assert List_Insert(List_Empty, d) == Cons(d, List_Empty); }
-        List_ToMultiset(Cons(d, List_Empty));
-          { assert List_ToMultiset(Cons(d, List_Empty)) == List_ToMultiset(List_Empty) + multiset{d}; }
-        List_ToMultiset(List_Empty) + multiset{d};
-          { assert List_Empty == list; }
-        List_ToMultiset(list) + multiset{d};
-      }
-    case Cons(head, tail) =>
-      calc == {
-        List_ToMultiset(List_Insert(list, d));
-          { assert list == Cons(head, tail); }
-        List_ToMultiset(List_Insert(Cons(head, tail), d));
-          { assert List_Insert(Cons(head, tail), d) == Cons(head, List_Insert(tail, d)); }
-        List_ToMultiset(Cons(head, List_Insert(tail, d)));
-          { assert List_ToMultiset(Cons(head, List_Insert(tail, d))) == List_ToMultiset(List_Insert(tail, d)) + multiset{head}; }
-        List_ToMultiset(List_Insert(tail, d)) + multiset{head};
-          { Lemma_ListInsertIntegrity(tail, d); }
-        List_ToMultiset(list) + multiset{d};
-      }
   }
 }
 
@@ -165,35 +104,6 @@ lemma {:induction a} Lemma_ListConcatIntegrity(a:List<T>, b:List<T>)
         List_ToMultiset(Cons(ha, List_Empty)) + List_ToMultiset(List_Concat(ta, b));
           { Lemma_ListConcatIntegrity(ta, b); }
         List_ToMultiset(a) + List_ToMultiset(b);
-      }
-  }
-}
-
-lemma {:induction a} Lemma_ListConcatSize(a:List<T>, b:List<T>)
-  ensures List_Size(List_Concat(a, b)) == List_Size(a) + List_Size(b)
-  decreases a, b
-{
-  match a {
-    case List_Empty =>
-      calc == {
-        List_Size(List_Concat(a, b));
-          { assert a == List_Empty; }
-        List_Size(List_Concat(List_Empty, b));
-          { assert List_Size(List_Empty) == 0; }
-          { assert List_Size(List_Empty) + List_Size(b) == 0 + List_Size(b); }
-        0 + List_Size(b);
-          { assert 0 == List_Size(List_Empty); }
-        List_Size(List_Empty) + List_Size(b);
-          { assert List_Size(List_Empty) == List_Size(a); }
-        List_Size(a) + List_Size(b);
-      }
-    case Cons(ha, ta) =>
-      calc == {
-        List_Size(List_Concat(a, b));
-          { assert List_Size(List_Concat(a, b)) == List_Size(Cons(ha, List_Empty)) + List_Size(List_Concat(ta, b)); }
-        List_Size(Cons(ha, List_Empty)) + List_Size(List_Concat(ta, b));
-          { Lemma_ListConcatSize(ta, b); }
-        List_Size(a) + List_Size(b);
       }
   }
 }

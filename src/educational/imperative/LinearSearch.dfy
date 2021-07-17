@@ -7,7 +7,7 @@
  *    Ningún elemento tal que su índice sea menor al actual puede ser el elemento buscado
  *
  */
-method LinealSearch(A:array<int>, key:int) returns (index:int)
+method LinearSearch(A:array<int>, key:int) returns (index:int)
   ensures 0 <= index ==> index < A.Length && A[index] == key
   ensures index < 0 ==> key !in A[..]
 {
