@@ -101,7 +101,7 @@ function method BST_Load(list:List<T>) : (tree:BST<T>)
  *    ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
  *
  *  Lemma_BSTInOrderOrdering(tree)
- *    ==> ensures list_ordered(BST_InOrder(tree))
+ *    ==> ensures list_increasing(BST_InOrder(tree))
  *
  *  Lemma_BSTInOrderUpperBound(tree, d)
  *    ==> ensures list_upper_bound(BST_InOrder(tree), d)
@@ -397,25 +397,25 @@ lemma {:induction tree} Lemma_BSTInOrderIntegrity(tree:BST<T>)
 
 lemma {:induction tree} Lemma_BSTInOrderOrdering(tree:BST<T>)
   requires bst_ordered(tree)
-  ensures list_ordered(BST_InOrder(tree))
+  ensures list_increasing(BST_InOrder(tree))
 {
   match tree {
     case Leaf =>
       calc == {
-        list_ordered(BST_InOrder(tree));
+        list_increasing(BST_InOrder(tree));
           { assert tree == Leaf; }
-        list_ordered(BST_InOrder(Leaf));
+        list_increasing(BST_InOrder(Leaf));
           { assert BST_InOrder(Leaf) == List_Empty; }
-        list_ordered(List_Empty);
+        list_increasing(List_Empty);
         true;
       }
     case Node(left, x, right) =>
       calc == {
-        list_ordered(BST_InOrder(tree));
+        list_increasing(BST_InOrder(tree));
           { assert tree == Node(left, x, right); }
-        list_ordered(BST_InOrder(Node(left, x, right)));
+        list_increasing(BST_InOrder(Node(left, x, right)));
           { assert BST_InOrder(Node(left, x, right)) ==  List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
-        list_ordered(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
+        list_increasing(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
           { assert bst_lower_bound(right, x); }
           { Lemma_BSTInOrderLowerBound(right, x); }
           { assert bst_upper_bound(left, x); }

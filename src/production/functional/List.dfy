@@ -7,13 +7,13 @@ datatype List<T> = List_Empty | Cons(head:T, tail:List<T>)
 
 // --------------------------------------- Predicates ------------------------------------------- //
 
-predicate list_ordered(list:List<T>)
+predicate list_increasing(list:List<T>)
   decreases list
 {
   match list {
     case List_Empty => true
     case Cons(head, List_Empty) => true
-    case Cons(head, Cons(ht, tail)) => head <= ht && list_ordered(Cons(ht, tail))
+    case Cons(head, Cons(ht, tail)) => head <= ht && list_increasing(Cons(ht, tail))
   }
 }
 
@@ -52,7 +52,7 @@ function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
  *    ==> ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
  *
  *  Lemma_ListConcatWithMidElemOrdering(a, x, b)
- *    ==> ensures list_ordered(List_Concat(a, Cons(x, b)))
+ *    ==> ensures list_increasing(List_Concat(a, Cons(x, b)))
  *
  *  Lemma_ListConcatUpperBound(a, b, d, x)
  *    ==> ensures list_upper_bound(List_Concat(a, Cons(x, b)), d)
@@ -78,11 +78,11 @@ lemma {:induction a} Lemma_ListConcatIntegrity(a:List<T>, b:List<T>)
 { }
 
 lemma {:induction a, b} Lemma_ListConcatWithMidElemOrdering(a:List<T>, x:T, b:List<T>)
-  requires list_ordered(a)
-  requires list_ordered(b)
+  requires list_increasing(a)
+  requires list_increasing(b)
   requires list_lower_bound(b, x)
   requires list_upper_bound(a, x)
-  ensures list_ordered(List_Concat(a, Cons(x, b)))
+  ensures list_increasing(List_Concat(a, Cons(x, b)))
   decreases a, b
 { }
 

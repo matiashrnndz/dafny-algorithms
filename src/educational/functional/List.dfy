@@ -7,13 +7,13 @@ datatype List<T> = List_Empty | Cons(head:T, tail:List<T>)
 
 // --------------------------------------- Predicates ------------------------------------------- //
 
-predicate list_ordered(list:List<T>)
+predicate list_increasing(list:List<T>)
   decreases list
 {
   match list {
     case List_Empty => true
     case Cons(head, List_Empty) => true
-    case Cons(head, Cons(ht, tail)) => head <= ht && list_ordered(Cons(ht, tail))
+    case Cons(head, Cons(ht, tail)) => head <= ht && list_increasing(Cons(ht, tail))
   }
 }
 
@@ -58,7 +58,7 @@ function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
  *    ==> ensures List_Concat(List_Empty, b) == b
  *
  *  Lemma_ListConcatWithMidElemOrdering(a, x, b)
- *    ==> ensures list_ordered(List_Concat(a, Cons(x, b)))
+ *    ==> ensures list_increasing(List_Concat(a, Cons(x, b)))
  *
  *  Lemma_ListConcatUpperBound(a, b, d, x)
  *    ==> ensures list_upper_bound(List_Concat(a, Cons(x, b)), d)
@@ -138,54 +138,54 @@ lemma {:induction a} Lemma_ListConcatFirstListEmpty(a:List<T>, b:List<T>)
 }
 
 lemma {:induction a, b} Lemma_ListConcatWithMidElemOrdering(a:List<T>, x:T, b:List<T>)
-  requires list_ordered(a)
-  requires list_ordered(b)
+  requires list_increasing(a)
+  requires list_increasing(b)
   requires list_lower_bound(b, x)
   requires list_upper_bound(a, x)
-  ensures list_ordered(List_Concat(a, Cons(x, b)))
+  ensures list_increasing(List_Concat(a, Cons(x, b)))
   decreases a, b
 {
   match a {
     case List_Empty =>
       calc == {
-        list_ordered(List_Concat(a, Cons(x, b)));
+        list_increasing(List_Concat(a, Cons(x, b)));
           { assert a == List_Empty; }
-        list_ordered(List_Concat(List_Empty, Cons(x, b)));
+        list_increasing(List_Concat(List_Empty, Cons(x, b)));
           { Lemma_ListConcatFirstListEmpty(List_Empty, b); }
-        list_ordered(Cons(x, b));
+        list_increasing(Cons(x, b));
           { assert list_lower_bound(b, x); }
-          { assert list_ordered(b); }
+          { assert list_increasing(b); }
         true;
       }
     case Cons(ha, ta) =>
       match ta {
         case List_Empty =>
           calc == {
-            list_ordered(List_Concat(a, Cons(x, b)));
+            list_increasing(List_Concat(a, Cons(x, b)));
               { assert a == Cons(ha, ta); }
-            list_ordered(List_Concat(Cons(ha, ta), Cons(x, b)));
+            list_increasing(List_Concat(Cons(ha, ta), Cons(x, b)));
               { assert List_Concat(Cons(ha, ta), Cons(x, b)) == Cons(ha, List_Concat(ta, Cons(x, b))); }
-            list_ordered(Cons(ha, List_Concat(ta, Cons(x, b))));
+            list_increasing(Cons(ha, List_Concat(ta, Cons(x, b))));
               { assert ta == List_Empty; }
-            list_ordered(Cons(ha, List_Concat(List_Empty, Cons(x, b))));
+            list_increasing(Cons(ha, List_Concat(List_Empty, Cons(x, b))));
               { Lemma_ListConcatFirstListEmpty(List_Empty, b); }
-            list_ordered(Cons(ha, Cons(x, b)));
+            list_increasing(Cons(ha, Cons(x, b)));
               { assert ha <= x; }
               { assert list_lower_bound(b, x); }
-              { assert list_ordered(b); }
+              { assert list_increasing(b); }
             true;
           }
         case Cons(tah, tat) =>
           calc ==> {
-            list_ordered(List_Concat(a, Cons(x, b)));
+            list_increasing(List_Concat(a, Cons(x, b)));
               { assert a == Cons(ha, ta); }
-            list_ordered(List_Concat(Cons(ha, ta), Cons(x, b)));
+            list_increasing(List_Concat(Cons(ha, ta), Cons(x, b)));
               { assert List_Concat(Cons(ha, ta), Cons(x, b)) == Cons(ha, List_Concat(ta, Cons(x, b))); }
-            list_ordered(Cons(ha, List_Concat(ta, Cons(x, b))));
+            list_increasing(Cons(ha, List_Concat(ta, Cons(x, b))));
               { assert ta == Cons(tah, tat); }
-            list_ordered(Cons(ha, List_Concat(Cons(tah, tat), Cons(x, b))));
-              { assert (ha <= tah && list_ordered(List_Concat(Cons(tah, tat), Cons(x, b)))); }
-            ha <= tah && list_ordered(List_Concat(Cons(tah, tat), Cons(x, b)));
+            list_increasing(Cons(ha, List_Concat(Cons(tah, tat), Cons(x, b))));
+              { assert (ha <= tah && list_increasing(List_Concat(Cons(tah, tat), Cons(x, b)))); }
+            ha <= tah && list_increasing(List_Concat(Cons(tah, tat), Cons(x, b)));
               { Lemma_ListConcatWithMidElemOrdering(Cons(tah, tat), x, Cons(x, b)); }
             true;
           }

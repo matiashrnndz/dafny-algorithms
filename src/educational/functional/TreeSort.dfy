@@ -8,7 +8,7 @@ include "./BST.dfy"
  *    ==> ensures List_ToMultiset(TreeSort(list)) == List_ToMultiset(list)
  *
  *  Lemma_TreeSortOrdering(list)
- *    ==> ensures list_ordered(TreeSort(list))
+ *    ==> ensures list_increasing(TreeSort(list))
  *
  */
 function method TreeSort(list:List<int>) : (sortedList:List<int>)
@@ -34,12 +34,12 @@ lemma Lemma_TreeSortIntegrity(list:List<T>)
 }
 
 lemma Lemma_TreeSortOrdering(list:List<T>)
-  ensures list_ordered(TreeSort(list))
+  ensures list_increasing(TreeSort(list))
 {
   calc == {
-    list_ordered(TreeSort(list));
+    list_increasing(TreeSort(list));
       { assert TreeSort(list) == BST_InOrder(BST_Load(list)); }
-    list_ordered(BST_InOrder(BST_Load(list)));
+    list_increasing(BST_InOrder(BST_Load(list)));
       { Lemma_BSTLoadOrdering(list); }
       { assert bst_ordered(BST_Load(list)); }
       { Lemma_BSTInOrderOrdering(BST_Load(list)); }
