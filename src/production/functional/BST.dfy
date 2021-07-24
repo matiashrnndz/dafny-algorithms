@@ -2,8 +2,7 @@ include "./List.dfy"
 
 // --------------------------------------- Datatypes -------------------------------------------- //
 
-datatype Leaf = Nil
-datatype BST<T> = Leaf | Node(left:BST<T>, data:T, right:BST<T>)
+datatype BST<T> = Nil | Node(left:BST<T>, data:T, right:BST<T>)
 
 // --------------------------------------- Predicates ------------------------------------------- //
 
@@ -11,7 +10,7 @@ predicate bst_ordered(tree:BST<T>)
   decreases tree
 {
   match tree {
-    case Leaf => true
+    case Nil => true
     case Node(left, x, right) =>
       bst_ordered(left) &&
       bst_ordered(right) &&
@@ -24,7 +23,7 @@ predicate bst_lower_bound(tree:BST<T>, d:T)
   decreases tree
 {
   match tree {
-    case Leaf => true
+    case Nil => true
     case Node(left, x, right) => d <= x && bst_lower_bound(left, d) && bst_lower_bound(right, d)
   }
 }
@@ -33,7 +32,7 @@ predicate bst_upper_bound(tree:BST<T>, d:T)
   decreases tree
 {
   match tree {
-    case Leaf => true
+    case Nil => true
     case Node(left, x, right) => d >= x && bst_upper_bound(left, d) && bst_upper_bound(right, d)
   }
 }
@@ -44,7 +43,7 @@ function method BST_ToMultiset(tree:BST<T>) : multiset<T>
   decreases tree
 {
   match tree {
-    case Leaf => multiset{}
+    case Nil => multiset{}
     case Node(left, x, right) => multiset{x} + BST_ToMultiset(left) + BST_ToMultiset(right)
   }
 }
@@ -68,7 +67,7 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
   decreases tree
 {
   match tree {
-    case Leaf => Node(Leaf, d, Leaf)
+    case Nil => Node(BST.Nil, d, BST.Nil)
     case Node(left, x, right) =>
       if (d < x) then
         Node(BST_Insert(left, d), x , right)
@@ -90,7 +89,7 @@ function method BST_Load(list:List<T>) : (tree:BST<T>)
   decreases list
 {
   match list {
-    case List_Empty => Leaf
+    case Nil => BST.Nil
     case Cons(head, tail) => BST_Insert(BST_Load(tail), head)
   }
 }
@@ -114,7 +113,7 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
   decreases tree
 {
   match tree {
-    case Leaf => List_Empty
+    case Nil => List.Nil
     case Node(left, x, right) => 
       List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))
   }
@@ -133,10 +132,10 @@ lemma {:induction tree} Lemma_BSTInsertOrdering(tree:BST<T>, d:T)
   decreases tree
 {
   match tree {
-    case Leaf =>
+    case Nil =>
       calc == {
-        bst_ordered(BST_Insert(Leaf, d));
-        bst_ordered(Node(Leaf, d, Leaf));
+        bst_ordered(BST_Insert(BST.Nil, d));
+        bst_ordered(Node(BST.Nil, d, BST.Nil));
         true;
       }
     case Node(left, x, right) =>
@@ -148,14 +147,14 @@ lemma {:induction tree} Lemma_BSTInsertOrdering(tree:BST<T>, d:T)
             bst_ordered(Node(BST_Insert(left, d), x, right));
               { Lemma_BSTInsertUpperBound(left, d, x); }
               { Lemma_BSTInsertOrdering(left, d); }
-            bst_ordered(Node(Leaf, d, Leaf));
+            bst_ordered(Node(BST.Nil, d, BST.Nil));
           }
         } else {
           calc == {
             bst_ordered(Node(left, x, BST_Insert(right, d)));
               { Lemma_BSTInsertLowerBound(right, d, x); }
               { Lemma_BSTInsertOrdering(right, d); }
-            bst_ordered(Node(Leaf, d, Leaf));
+            bst_ordered(Node(BST.Nil, d, BST.Nil));
           }
         } }
         true;
@@ -186,7 +185,7 @@ lemma {:induction list} Lemma_BSTLoadIntegrity(list:List<T>)
   decreases list
 {
   match list {
-    case List_Empty =>
+    case Nil =>
     case Cons(head, tail) =>
       calc == {
         BST_ToMultiset(BST_Load(Cons(head, tail)));
@@ -204,7 +203,7 @@ lemma {:induction list} Lemma_BSTLoadOrdering(list:List<T>)
   decreases list
 {
   match list {
-    case List_Empty =>
+    case Nil =>
     case Cons(head, tail) =>
       calc == {
         bst_ordered(BST_Load(Cons(head, tail)));
@@ -222,15 +221,15 @@ lemma {:induction tree} Lemma_BSTInOrderIntegrity(tree:BST<T>)
   decreases tree
 {
   match tree {
-    case Leaf =>
+    case Nil =>
     case Node(left, x, right) =>
       calc == {
         List_ToMultiset(BST_InOrder(Node(left, x, right)));
         List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
           { Lemma_ListConcatIntegrity(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
         List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, BST_InOrder(right)));
-        List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, List_Empty)) + List_ToMultiset(BST_InOrder(right));
-        List_ToMultiset(BST_InOrder(left)) + multiset{x} + List_ToMultiset(List_Empty) + List_ToMultiset(BST_InOrder(right));
+        List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, List.Nil)) + List_ToMultiset(BST_InOrder(right));
+        List_ToMultiset(BST_InOrder(left)) + multiset{x} + List_ToMultiset(List.Nil) + List_ToMultiset(BST_InOrder(right));
         List_ToMultiset(BST_InOrder(left)) + multiset{x} + List_ToMultiset(BST_InOrder(right));
           { Lemma_BSTInOrderIntegrity(left); }
           { Lemma_BSTInOrderIntegrity(right); }
@@ -244,7 +243,7 @@ lemma {:induction tree} Lemma_BSTInOrderOrdering(tree:BST<T>)
   ensures list_increasing(BST_InOrder(tree))
 {
   match tree {
-    case Leaf =>
+    case Nil =>
     case Node(left, x, right) =>
       calc == {
         list_increasing(BST_InOrder(Node(left, x, right)));
@@ -263,7 +262,7 @@ lemma {:induction tree} Lemma_BSTInOrderUpperBound(tree:BST<T>, d:T)
   ensures list_upper_bound(BST_InOrder(tree), d)
 {
   match tree {
-    case Leaf =>
+    case Nil =>
     case Node(left, x, right) =>
       calc == {
         list_upper_bound(BST_InOrder(Node(left, x, right)), d);
@@ -280,7 +279,7 @@ lemma {:induction tree} Lemma_BSTInOrderLowerBound(tree:BST<T>, d:T)
   ensures list_lower_bound(BST_InOrder(tree), d)
 {
   match tree {
-    case Leaf =>
+    case Nil =>
     case Node(left, x, right) =>
       calc == {
         list_lower_bound(BST_InOrder(Node(left, x, right)), d);

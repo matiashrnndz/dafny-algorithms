@@ -2,8 +2,7 @@ type T = int
 
 // --------------------------------------- Datatypes -------------------------------------------- //
 
-datatype List_Empty = Nil
-datatype List<T> = List_Empty | Cons(head:T, tail:List<T>)
+datatype List<T> = Nil | Cons(head:T, tail:List<T>)
 
 // --------------------------------------- Predicates ------------------------------------------- //
 
@@ -11,8 +10,8 @@ predicate list_increasing(list:List<T>)
   decreases list
 {
   match list {
-    case List_Empty => true
-    case Cons(head, List_Empty) => true
+    case Nil => true
+    case Cons(head, Nil) => true
     case Cons(head, Cons(ht, tail)) => head <= ht && list_increasing(Cons(ht, tail))
   }
 }
@@ -21,7 +20,7 @@ predicate list_lower_bound(list:List<T>, d:T)
   decreases list
 {
   match list {
-    case List_Empty => true
+    case Nil => true
     case Cons(head, tail) => (d <= head) && list_lower_bound(tail, d)
   }
 }
@@ -30,7 +29,7 @@ predicate list_upper_bound(list:List<T>, d:T)
   decreases list
 {
   match list {
-    case List_Empty => true
+    case Nil => true
     case Cons(head, tail) => (d >= head) && list_upper_bound(tail, d)
   }
 }
@@ -41,7 +40,7 @@ function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
   decreases list
 {
   match list {
-    case List_Empty => multiset{}
+    case Nil => multiset{}
     case Cons(head, tail) => multiset{head} + List_ToMultiset(tail)
   }
 }
@@ -51,11 +50,11 @@ function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
  *  Lemma_ListConcatIntegrity(a, b)
  *    ==> ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
  *
- *  Lemma_ListConcatBothListEmpty(List_Empty, List_Empty)
- *    ==> ensures List_Concat(a, b) == List_Empty
+ *  Lemma_ListConcatBothListEmpty(List.Nil, List.Nil)
+ *    ==> ensures List_Concat(a, b) == List.Nil
  *
- *  Lemma_ListConcatFirstListEmpty(List_Empty, b)
- *    ==> ensures List_Concat(List_Empty, b) == b
+ *  Lemma_ListConcatFirstListEmpty(List.Nil, b)
+ *    ==> ensures List_Concat(List.Nil, b) == b
  *
  *  Lemma_ListConcatWithMidElemOrdering(a, x, b)
  *    ==> ensures list_increasing(List_Concat(a, Cons(x, b)))
@@ -71,7 +70,7 @@ function method List_Concat(a:List<T>, b:List<T>) : List<T>
   decreases a
 {
   match a {
-    case List_Empty => b
+    case Nil => b
     case Cons(head, tail) => Cons(head, List_Concat(tail, b))
   }
 }
@@ -83,25 +82,25 @@ lemma {:induction a} Lemma_ListConcatIntegrity(a:List<T>, b:List<T>)
   decreases a, b
 {
   match a {
-    case List_Empty =>
+    case Nil =>
       calc == {
         List_ToMultiset(List_Concat(a, b));
-          { assert a == List_Empty; }
-        List_ToMultiset(List_Concat(List_Empty, b));
-          { assert List_ToMultiset(List_Concat(List_Empty, b)) == List_ToMultiset(List_Empty) + List_ToMultiset(b); }
-        List_ToMultiset(List_Empty) + List_ToMultiset(b);
-          { assert List_ToMultiset(List_Empty) == multiset{}; }
+          { assert a == List.Nil; }
+        List_ToMultiset(List_Concat(List.Nil, b));
+          { assert List_ToMultiset(List_Concat(List.Nil, b)) == List_ToMultiset(List.Nil) + List_ToMultiset(b); }
+        List_ToMultiset(List.Nil) + List_ToMultiset(b);
+          { assert List_ToMultiset(List.Nil) == multiset{}; }
         multiset{} + List_ToMultiset(b);
-          { assert multiset{} == List_ToMultiset(List_Empty); }
-        List_ToMultiset(List_Empty) + List_ToMultiset(b);
-          { assert List_ToMultiset(List_Empty) == List_ToMultiset(a); }
+          { assert multiset{} == List_ToMultiset(List.Nil); }
+        List_ToMultiset(List.Nil) + List_ToMultiset(b);
+          { assert List_ToMultiset(List.Nil) == List_ToMultiset(a); }
         List_ToMultiset(a) + List_ToMultiset(b);
       }
     case Cons(ha, ta) =>
       calc == {
         List_ToMultiset(List_Concat(a, b));
-          { assert List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(Cons(ha, List_Empty)) + List_ToMultiset(List_Concat(ta, b)); }
-        List_ToMultiset(Cons(ha, List_Empty)) + List_ToMultiset(List_Concat(ta, b));
+          { assert List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(Cons(ha, List.Nil)) + List_ToMultiset(List_Concat(ta, b)); }
+        List_ToMultiset(Cons(ha, List.Nil)) + List_ToMultiset(List_Concat(ta, b));
           { Lemma_ListConcatIntegrity(ta, b); }
         List_ToMultiset(a) + List_ToMultiset(b);
       }
@@ -109,30 +108,30 @@ lemma {:induction a} Lemma_ListConcatIntegrity(a:List<T>, b:List<T>)
 }
 
 lemma {:induction a, b} Lemma_ListConcatBothListEmpty(a:List<T>, b:List<T>)
-  requires a == List_Empty
-  requires b == List_Empty
-  ensures List_Concat(a, b) == List_Empty
+  requires a == List.Nil
+  requires b == List.Nil
+  ensures List_Concat(a, b) == List.Nil
 {
   calc == {
     List_Concat(a, b);
-      { assert a == List_Empty; }
-    List_Concat(List_Empty, b);
-      { assert List_Concat(List_Empty, b) == b; }
+      { assert a == List.Nil; }
+    List_Concat(List.Nil, b);
+      { assert List_Concat(List.Nil, b) == b; }
     b;
-      { assert b == List_Empty; }
-    List_Empty;
+      { assert b == List.Nil; }
+    List.Nil;
   }
 }
 
 lemma {:induction a} Lemma_ListConcatFirstListEmpty(a:List<T>, b:List<T>)
-  requires a == List_Empty
+  requires a == List.Nil
   ensures List_Concat(a, b) == b
 {
   calc == {
     List_Concat(a, b);
-      { assert a == List_Empty; }
-    List_Concat(List_Empty, b);
-      { assert List_Concat(List_Empty, b) == b; }
+      { assert a == List.Nil; }
+    List_Concat(List.Nil, b);
+      { assert List_Concat(List.Nil, b) == b; }
     b;
   }
 }
@@ -146,12 +145,12 @@ lemma {:induction a, b} Lemma_ListConcatWithMidElemOrdering(a:List<T>, x:T, b:Li
   decreases a, b
 {
   match a {
-    case List_Empty =>
+    case Nil =>
       calc == {
         list_increasing(List_Concat(a, Cons(x, b)));
-          { assert a == List_Empty; }
-        list_increasing(List_Concat(List_Empty, Cons(x, b)));
-          { Lemma_ListConcatFirstListEmpty(List_Empty, b); }
+          { assert a == List.Nil; }
+        list_increasing(List_Concat(List.Nil, Cons(x, b)));
+          { Lemma_ListConcatFirstListEmpty(List.Nil, b); }
         list_increasing(Cons(x, b));
           { assert list_lower_bound(b, x); }
           { assert list_increasing(b); }
@@ -159,16 +158,16 @@ lemma {:induction a, b} Lemma_ListConcatWithMidElemOrdering(a:List<T>, x:T, b:Li
       }
     case Cons(ha, ta) =>
       match ta {
-        case List_Empty =>
+        case Nil =>
           calc == {
             list_increasing(List_Concat(a, Cons(x, b)));
               { assert a == Cons(ha, ta); }
             list_increasing(List_Concat(Cons(ha, ta), Cons(x, b)));
               { assert List_Concat(Cons(ha, ta), Cons(x, b)) == Cons(ha, List_Concat(ta, Cons(x, b))); }
             list_increasing(Cons(ha, List_Concat(ta, Cons(x, b))));
-              { assert ta == List_Empty; }
-            list_increasing(Cons(ha, List_Concat(List_Empty, Cons(x, b))));
-              { Lemma_ListConcatFirstListEmpty(List_Empty, b); }
+              { assert ta == List.Nil; }
+            list_increasing(Cons(ha, List_Concat(List.Nil, Cons(x, b))));
+              { Lemma_ListConcatFirstListEmpty(List.Nil, b); }
             list_increasing(Cons(ha, Cons(x, b)));
               { assert ha <= x; }
               { assert list_lower_bound(b, x); }
@@ -201,12 +200,12 @@ lemma {:induction listLeft} Lemma_ListConcatUpperBound(listLeft:List<T>, listRig
   decreases listLeft
 {
   match listLeft {
-    case List_Empty =>
+    case Nil =>
       calc == {
         list_upper_bound(List_Concat(listLeft, Cons(x, listRight)), d);
-          { assert listLeft == List_Empty; }
-        list_upper_bound(List_Concat(List_Empty, Cons(x, listRight)), d);
-          { Lemma_ListConcatFirstListEmpty(List_Empty, Cons(x, listRight)); }
+          { assert listLeft == List.Nil; }
+        list_upper_bound(List_Concat(List.Nil, Cons(x, listRight)), d);
+          { Lemma_ListConcatFirstListEmpty(List.Nil, Cons(x, listRight)); }
         list_upper_bound(Cons(x, listRight), d);
           { assert list_upper_bound(listRight, d); }
           { assert d >= x; }
@@ -214,14 +213,14 @@ lemma {:induction listLeft} Lemma_ListConcatUpperBound(listLeft:List<T>, listRig
       }
     case Cons(lh, lt) =>
       match lt {
-        case List_Empty =>
+        case Nil =>
           calc == {
             list_upper_bound(List_Concat(listLeft, Cons(x, listRight)), d);
-              { assert listLeft == Cons(lh, List_Empty); }
-            list_upper_bound(List_Concat(Cons(lh, List_Empty), Cons(x, listRight)), d);
-              { assert List_Concat(Cons(lh, List_Empty), Cons(x, listRight)) == Cons(lh, List_Concat(List_Empty, Cons(x, listRight))); }
-            list_upper_bound(Cons(lh, List_Concat(List_Empty, Cons(x, listRight))), d);
-              { Lemma_ListConcatFirstListEmpty(List_Empty, Cons(x, listRight)); }
+              { assert listLeft == Cons(lh, List.Nil); }
+            list_upper_bound(List_Concat(Cons(lh, List.Nil), Cons(x, listRight)), d);
+              { assert List_Concat(Cons(lh, List.Nil), Cons(x, listRight)) == Cons(lh, List_Concat(List.Nil, Cons(x, listRight))); }
+            list_upper_bound(Cons(lh, List_Concat(List.Nil, Cons(x, listRight))), d);
+              { Lemma_ListConcatFirstListEmpty(List.Nil, Cons(x, listRight)); }
             list_upper_bound(Cons(lh, Cons(x, listRight)), d);
               { assert d >= x; }
               { assert list_upper_bound(listRight, d); }
@@ -253,12 +252,12 @@ lemma {:induction listLeft} Lemma_ListConcatLowerBound(listLeft:List<T>, listRig
   decreases listLeft
 {
   match listLeft {
-    case List_Empty =>
+    case Nil =>
       calc == {
         list_lower_bound(List_Concat(listLeft, Cons(x, listRight)), d);
-          { assert listLeft == List_Empty; }
-        list_lower_bound(List_Concat(List_Empty, Cons(x, listRight)), d);
-          { Lemma_ListConcatFirstListEmpty(List_Empty, Cons(x, listRight)); }
+          { assert listLeft == List.Nil; }
+        list_lower_bound(List_Concat(List.Nil, Cons(x, listRight)), d);
+          { Lemma_ListConcatFirstListEmpty(List.Nil, Cons(x, listRight)); }
         list_lower_bound(Cons(x, listRight), d);
           { assert list_lower_bound(listRight, d); }
           { assert d <= x; }
@@ -266,14 +265,14 @@ lemma {:induction listLeft} Lemma_ListConcatLowerBound(listLeft:List<T>, listRig
       }
     case Cons(lh, lt) =>
       match lt {
-        case List_Empty =>
+        case Nil =>
           calc == {
             list_lower_bound(List_Concat(listLeft, Cons(x, listRight)), d);
-              { assert listLeft == Cons(lh, List_Empty); }
-            list_lower_bound(List_Concat(Cons(lh, List_Empty), Cons(x, listRight)), d);
-              { assert List_Concat(Cons(lh, List_Empty), Cons(x, listRight)) == Cons(lh, List_Concat(List_Empty, Cons(x, listRight))); }
-            list_lower_bound(Cons(lh, List_Concat(List_Empty, Cons(x, listRight))), d);
-              { Lemma_ListConcatFirstListEmpty(List_Empty, Cons(x, listRight)); }
+              { assert listLeft == Cons(lh, List.Nil); }
+            list_lower_bound(List_Concat(Cons(lh, List.Nil), Cons(x, listRight)), d);
+              { assert List_Concat(Cons(lh, List.Nil), Cons(x, listRight)) == Cons(lh, List_Concat(List.Nil, Cons(x, listRight))); }
+            list_lower_bound(Cons(lh, List_Concat(List.Nil, Cons(x, listRight))), d);
+              { Lemma_ListConcatFirstListEmpty(List.Nil, Cons(x, listRight)); }
             list_lower_bound(Cons(lh, Cons(x, listRight)), d);
               { assert d <= x; }
               { assert list_lower_bound(listRight, d); }

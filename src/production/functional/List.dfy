@@ -2,8 +2,7 @@ type T = int
 
 // --------------------------------------- Datatypes -------------------------------------------- //
 
-datatype List_Empty = Nil
-datatype List<T> = List_Empty | Cons(head:T, tail:List<T>)
+datatype List<T> = Nil | Cons(head:T, tail:List<T>)
 
 // --------------------------------------- Predicates ------------------------------------------- //
 
@@ -11,8 +10,8 @@ predicate list_increasing(list:List<T>)
   decreases list
 {
   match list {
-    case List_Empty => true
-    case Cons(head, List_Empty) => true
+    case Nil => true
+    case Cons(head, Nil) => true
     case Cons(head, Cons(ht, tail)) => head <= ht && list_increasing(Cons(ht, tail))
   }
 }
@@ -21,7 +20,7 @@ predicate list_lower_bound(list:List<T>, d:T)
   decreases list
 {
   match list {
-    case List_Empty => true
+    case Nil => true
     case Cons(head, tail) => (d <= head) && list_lower_bound(tail, d)
   }
 }
@@ -30,7 +29,7 @@ predicate list_upper_bound(list:List<T>, d:T)
   decreases list
 {
   match list {
-    case List_Empty => true
+    case Nil => true
     case Cons(head, tail) => (d >= head) && list_upper_bound(tail, d)
   }
 }
@@ -41,7 +40,7 @@ function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
   decreases list
 {
   match list {
-    case List_Empty => multiset{}
+    case Nil => multiset{}
     case Cons(head, tail) => multiset{head} + List_ToMultiset(tail)
   }
 }
@@ -65,7 +64,7 @@ function method List_Concat(a:List<T>, b:List<T>) : List<T>
   decreases a
 {
   match a {
-    case List_Empty => b
+    case Nil => b
     case Cons(head, tail) => Cons(head, List_Concat(tail, b))
   }
 }
