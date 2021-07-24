@@ -114,8 +114,7 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
 {
   match tree {
     case Nil => List.Nil
-    case Node(left, x, right) => 
-      List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))
+    case Node(left, x, right) => List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))
   }
 }
 
@@ -133,7 +132,8 @@ lemma {:induction tree} Lemma_BSTInsertIntegrity(tree:BST<T>, d:T)
         BST_ToMultiset(BST_Insert(BST.Nil, d));
           { assert BST_Insert(BST.Nil, d) == Node(BST.Nil, d, BST.Nil); }
         BST_ToMultiset(Node(BST.Nil, d, BST.Nil));
-          { assert BST_ToMultiset(Node(BST.Nil, d, BST.Nil)) == BST_ToMultiset(BST.Nil) + multiset{d} + BST_ToMultiset(BST.Nil); }
+          { assert BST_ToMultiset(Node(BST.Nil, d, BST.Nil))
+                == BST_ToMultiset(BST.Nil) + multiset{d} + BST_ToMultiset(BST.Nil); }
         BST_ToMultiset(BST.Nil) + multiset{d} + BST_ToMultiset(BST.Nil);
           { assert BST_ToMultiset(BST.Nil) == multiset{}; }
         BST_ToMultiset(BST.Nil) + multiset{d} + multiset{};
@@ -150,18 +150,22 @@ lemma {:induction tree} Lemma_BSTInsertIntegrity(tree:BST<T>, d:T)
         { if (d < x) {
           calc == {
             BST_ToMultiset(BST_Insert(Node(left, x, right), d));
-              { assert BST_Insert(Node(left, x, right), d) == Node(BST_Insert(left, d), x , right); }
+              { assert BST_Insert(Node(left, x, right), d)
+                    == Node(BST_Insert(left, d), x , right); }
             BST_ToMultiset(Node(BST_Insert(left, d), x , right));
-              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right); }
+              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right))
+                    == BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right); }
             BST_ToMultiset(BST_Insert(left, d)) + multiset{x} + BST_ToMultiset(right);
               { Lemma_BSTInsertIntegrity(left, d); }
           }
         } else {
           calc == {
             BST_ToMultiset(BST_Insert(Node(left, x, right), d));
-              { assert BST_Insert(Node(left, x, right), d) == Node(left, x, BST_Insert(right, d)); }
+              { assert BST_Insert(Node(left, x, right), d)
+                    == Node(left, x, BST_Insert(right, d)); }
             BST_ToMultiset(Node(left, x, BST_Insert(right, d)));
-              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right)) == BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d)); }
+              { assert BST_ToMultiset(Node(BST_Insert(left, d), x , right))
+                    == BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d)); }
             BST_ToMultiset(left) + multiset{x} + BST_ToMultiset(BST_Insert(right, d));
               { Lemma_BSTInsertIntegrity(right, d); }
           }
@@ -226,9 +230,11 @@ lemma {:induction tree} Lemma_BSTInsertUpperBound(tree:BST<T>, d:T, b:T)
         bst_upper_bound(BST_Insert(tree, d), b);
           { assert tree == BST.Nil; }
         bst_upper_bound(BST_Insert(BST.Nil, d), b);
-          { assert bst_upper_bound(BST_Insert(BST.Nil, d), b) == bst_upper_bound(Node(BST.Nil, d, BST.Nil), b); }
+          { assert bst_upper_bound(BST_Insert(BST.Nil, d), b)
+                == bst_upper_bound(Node(BST.Nil, d, BST.Nil), b); }
         bst_upper_bound(Node(BST.Nil, d, BST.Nil), b);
-          { assert bst_upper_bound(Node(BST.Nil, d, BST.Nil), b) == (b >= d && bst_upper_bound(BST.Nil, b) && bst_upper_bound(BST.Nil, b)); }
+          { assert bst_upper_bound(Node(BST.Nil, d, BST.Nil), b)
+                == (b >= d && bst_upper_bound(BST.Nil, b) && bst_upper_bound(BST.Nil, b)); }
         (b >= d && bst_upper_bound(BST.Nil, b) && bst_upper_bound(BST.Nil, b));
           { assert bst_upper_bound(BST.Nil, b) == true; }
         (b >= d && true && true);
@@ -262,9 +268,11 @@ lemma {:induction tree} Lemma_BSTInsertLowerBound(tree:BST<T>, d:T, b:T)
         bst_lower_bound(BST_Insert(tree, d), b);
           { assert tree == BST.Nil; }
         bst_lower_bound(BST_Insert(BST.Nil, d), b);
-          { assert bst_lower_bound(BST_Insert(BST.Nil, d), b) == bst_lower_bound(Node(BST.Nil, d, BST.Nil), b); }
+          { assert bst_lower_bound(BST_Insert(BST.Nil, d), b)
+                == bst_lower_bound(Node(BST.Nil, d, BST.Nil), b); }
         bst_lower_bound(Node(BST.Nil, d, BST.Nil), b);
-          { assert bst_lower_bound(Node(BST.Nil, d, BST.Nil), b) == (b <= d && bst_lower_bound(BST.Nil, b) && bst_lower_bound(BST.Nil, b)); }
+          { assert bst_lower_bound(Node(BST.Nil, d, BST.Nil), b)
+                == (b <= d && bst_lower_bound(BST.Nil, b) && bst_lower_bound(BST.Nil, b)); }
         (b <= d && bst_lower_bound(BST.Nil, b) && bst_lower_bound(BST.Nil, b));
           { assert bst_lower_bound(BST.Nil, b) == true; }
         (b <= d && true && true);
@@ -341,7 +349,8 @@ lemma {:induction list} Lemma_BSTLoadOrdering(list:List<T>)
         bst_ordered(BST_Load(list));
           { assert list == Cons(head, tail); }
         bst_ordered(BST_Load(Cons(head, tail)));
-          { assert BST_Load(Cons(head, tail)) == BST_Insert(BST_Load(tail), head); }
+          { assert BST_Load(Cons(head, tail)) 
+                == BST_Insert(BST_Load(tail), head); }
         bst_ordered(BST_Insert(BST_Load(tail), head));
           { Lemma_BSTInsertOrdering(BST_Load(tail), head); }
         true;
@@ -375,13 +384,16 @@ lemma {:induction tree} Lemma_BSTInOrderIntegrity(tree:BST<T>)
         List_ToMultiset(BST_InOrder(tree));
           { assert tree == Node(left, x, right); }
         List_ToMultiset(BST_InOrder(Node(left, x, right)));
-          { assert List_ToMultiset(BST_InOrder(Node(left, x, right))) == List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))); }
+          { assert List_ToMultiset(BST_InOrder(Node(left, x, right)))
+                == List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))); }
         List_ToMultiset(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
           { Lemma_ListConcatIntegrity(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
         List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, BST_InOrder(right)));
-          { assert List_ToMultiset(Cons(x, BST_InOrder(right))) == List_ToMultiset(Cons(x, List.Nil)) + List_ToMultiset(BST_InOrder(right)); }
+          { assert List_ToMultiset(Cons(x, BST_InOrder(right)))
+                == List_ToMultiset(Cons(x, List.Nil)) + List_ToMultiset(BST_InOrder(right)); }
         List_ToMultiset(BST_InOrder(left)) + List_ToMultiset(Cons(x, List.Nil)) + List_ToMultiset(BST_InOrder(right));
-          { assert List_ToMultiset(Cons(x, List.Nil)) == multiset{x} + List_ToMultiset(List.Nil); }
+          { assert List_ToMultiset(Cons(x, List.Nil))
+                == multiset{x} + List_ToMultiset(List.Nil); }
         List_ToMultiset(BST_InOrder(left)) + multiset{x} + List_ToMultiset(List.Nil) + List_ToMultiset(BST_InOrder(right));
           { assert List_ToMultiset(List.Nil) == multiset{}; }
         List_ToMultiset(BST_InOrder(left)) + multiset{x} + multiset{} + List_ToMultiset(BST_InOrder(right));
@@ -413,7 +425,8 @@ lemma {:induction tree} Lemma_BSTInOrderOrdering(tree:BST<T>)
         list_increasing(BST_InOrder(tree));
           { assert tree == Node(left, x, right); }
         list_increasing(BST_InOrder(Node(left, x, right)));
-          { assert BST_InOrder(Node(left, x, right)) ==  List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
+          { assert BST_InOrder(Node(left, x, right))
+                == List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
         list_increasing(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))));
           { assert bst_lower_bound(right, x); }
           { Lemma_BSTInOrderLowerBound(right, x); }
@@ -445,7 +458,8 @@ lemma {:induction tree} Lemma_BSTInOrderUpperBound(tree:BST<T>, d:T)
           list_upper_bound(BST_InOrder(tree), d);
             { assert tree == Node(left, x, right); }
           list_upper_bound(BST_InOrder(Node(left, x, right)), d);
-            { assert BST_InOrder(Node(left, x, right)) == List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
+            { assert BST_InOrder(Node(left, x, right))
+                  == List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
           list_upper_bound(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))), d);
             { assert list_upper_bound(BST_InOrder(left), d); }
             { assert list_upper_bound(BST_InOrder(right), d); }
@@ -476,7 +490,8 @@ lemma {:induction tree} Lemma_BSTInOrderLowerBound(tree:BST<T>, d:T)
           list_lower_bound(BST_InOrder(tree), d);
             { assert tree == Node(left, x, right); }
           list_lower_bound(BST_InOrder(Node(left, x, right)), d);
-            { assert BST_InOrder(Node(left, x, right)) == List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
+            { assert BST_InOrder(Node(left, x, right))
+                  == List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))); }
           list_lower_bound(List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right))), d);
             { assert list_lower_bound(BST_InOrder(left), d); }
             { assert list_lower_bound(BST_InOrder(right), d); }

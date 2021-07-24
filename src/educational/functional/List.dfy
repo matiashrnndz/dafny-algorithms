@@ -87,7 +87,8 @@ lemma {:induction a} Lemma_ListConcatIntegrity(a:List<T>, b:List<T>)
         List_ToMultiset(List_Concat(a, b));
           { assert a == List.Nil; }
         List_ToMultiset(List_Concat(List.Nil, b));
-          { assert List_ToMultiset(List_Concat(List.Nil, b)) == List_ToMultiset(List.Nil) + List_ToMultiset(b); }
+          { assert List_ToMultiset(List_Concat(List.Nil, b)) 
+                == List_ToMultiset(List.Nil) + List_ToMultiset(b); }
         List_ToMultiset(List.Nil) + List_ToMultiset(b);
           { assert List_ToMultiset(List.Nil) == multiset{}; }
         multiset{} + List_ToMultiset(b);
@@ -99,8 +100,11 @@ lemma {:induction a} Lemma_ListConcatIntegrity(a:List<T>, b:List<T>)
     case Cons(ha, ta) =>
       calc == {
         List_ToMultiset(List_Concat(a, b));
-          { assert List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(Cons(ha, List.Nil)) + List_ToMultiset(List_Concat(ta, b)); }
-        List_ToMultiset(Cons(ha, List.Nil)) + List_ToMultiset(List_Concat(ta, b));
+          { assert a == Cons(ha, ta); }
+        List_ToMultiset(List_Concat(Cons(ha, ta), b));
+          { assert List_ToMultiset(List_Concat(Cons(ha, ta), b))
+                == List_ToMultiset(Cons(ha, ta)) + List_ToMultiset(b); }
+        List_ToMultiset(Cons(ha, ta)) + List_ToMultiset(b);
           { Lemma_ListConcatIntegrity(ta, b); }
         List_ToMultiset(a) + List_ToMultiset(b);
       }
@@ -163,7 +167,8 @@ lemma {:induction a, b} Lemma_ListConcatWithMidElemOrdering(a:List<T>, x:T, b:Li
             list_increasing(List_Concat(a, Cons(x, b)));
               { assert a == Cons(ha, ta); }
             list_increasing(List_Concat(Cons(ha, ta), Cons(x, b)));
-              { assert List_Concat(Cons(ha, ta), Cons(x, b)) == Cons(ha, List_Concat(ta, Cons(x, b))); }
+              { assert List_Concat(Cons(ha, ta), Cons(x, b)) 
+                    == Cons(ha, List_Concat(ta, Cons(x, b))); }
             list_increasing(Cons(ha, List_Concat(ta, Cons(x, b))));
               { assert ta == List.Nil; }
             list_increasing(Cons(ha, List_Concat(List.Nil, Cons(x, b))));
@@ -179,7 +184,8 @@ lemma {:induction a, b} Lemma_ListConcatWithMidElemOrdering(a:List<T>, x:T, b:Li
             list_increasing(List_Concat(a, Cons(x, b)));
               { assert a == Cons(ha, ta); }
             list_increasing(List_Concat(Cons(ha, ta), Cons(x, b)));
-              { assert List_Concat(Cons(ha, ta), Cons(x, b)) == Cons(ha, List_Concat(ta, Cons(x, b))); }
+              { assert List_Concat(Cons(ha, ta), Cons(x, b))
+                    == Cons(ha, List_Concat(ta, Cons(x, b))); }
             list_increasing(Cons(ha, List_Concat(ta, Cons(x, b))));
               { assert ta == Cons(tah, tat); }
             list_increasing(Cons(ha, List_Concat(Cons(tah, tat), Cons(x, b))));
@@ -218,7 +224,8 @@ lemma {:induction listLeft} Lemma_ListConcatUpperBound(listLeft:List<T>, listRig
             list_upper_bound(List_Concat(listLeft, Cons(x, listRight)), d);
               { assert listLeft == Cons(lh, List.Nil); }
             list_upper_bound(List_Concat(Cons(lh, List.Nil), Cons(x, listRight)), d);
-              { assert List_Concat(Cons(lh, List.Nil), Cons(x, listRight)) == Cons(lh, List_Concat(List.Nil, Cons(x, listRight))); }
+              { assert List_Concat(Cons(lh, List.Nil), Cons(x, listRight))
+                    == Cons(lh, List_Concat(List.Nil, Cons(x, listRight))); }
             list_upper_bound(Cons(lh, List_Concat(List.Nil, Cons(x, listRight))), d);
               { Lemma_ListConcatFirstListEmpty(List.Nil, Cons(x, listRight)); }
             list_upper_bound(Cons(lh, Cons(x, listRight)), d);
@@ -231,7 +238,8 @@ lemma {:induction listLeft} Lemma_ListConcatUpperBound(listLeft:List<T>, listRig
             list_upper_bound(List_Concat(listLeft, Cons(x, listRight)), d);
               { assert listLeft == Cons(lh, lt); }
             list_upper_bound(List_Concat(Cons(lh, lt), Cons(x, listRight)), d);
-              { assert List_Concat(Cons(lh, lt), Cons(x, listRight)) == Cons(lh, List_Concat(lt, Cons(x, listRight))); }
+              { assert List_Concat(Cons(lh, lt), Cons(x, listRight))
+                    == Cons(lh, List_Concat(lt, Cons(x, listRight))); }
             list_upper_bound(Cons(lh, List_Concat(lt, Cons(x, listRight))), d);
               { assert lt == Cons(tah, tat); }
             list_upper_bound(Cons(lh, List_Concat(Cons(tah, tat), Cons(x, listRight))), d);
@@ -270,7 +278,8 @@ lemma {:induction listLeft} Lemma_ListConcatLowerBound(listLeft:List<T>, listRig
             list_lower_bound(List_Concat(listLeft, Cons(x, listRight)), d);
               { assert listLeft == Cons(lh, List.Nil); }
             list_lower_bound(List_Concat(Cons(lh, List.Nil), Cons(x, listRight)), d);
-              { assert List_Concat(Cons(lh, List.Nil), Cons(x, listRight)) == Cons(lh, List_Concat(List.Nil, Cons(x, listRight))); }
+              { assert List_Concat(Cons(lh, List.Nil), Cons(x, listRight))
+                    == Cons(lh, List_Concat(List.Nil, Cons(x, listRight))); }
             list_lower_bound(Cons(lh, List_Concat(List.Nil, Cons(x, listRight))), d);
               { Lemma_ListConcatFirstListEmpty(List.Nil, Cons(x, listRight)); }
             list_lower_bound(Cons(lh, Cons(x, listRight)), d);
@@ -283,7 +292,8 @@ lemma {:induction listLeft} Lemma_ListConcatLowerBound(listLeft:List<T>, listRig
             list_lower_bound(List_Concat(listLeft, Cons(x, listRight)), d);
               { assert listLeft == Cons(lh, lt); }
             list_lower_bound(List_Concat(Cons(lh, lt), Cons(x, listRight)), d);
-              { assert List_Concat(Cons(lh, lt), Cons(x, listRight)) == Cons(lh, List_Concat(lt, Cons(x, listRight))); }
+              { assert List_Concat(Cons(lh, lt), Cons(x, listRight))
+                    == Cons(lh, List_Concat(lt, Cons(x, listRight))); }
             list_lower_bound(Cons(lh, List_Concat(lt, Cons(x, listRight))), d);
               { assert lt == Cons(tah, tat); }
             list_lower_bound(Cons(lh, List_Concat(Cons(tah, tat), Cons(x, listRight))), d);

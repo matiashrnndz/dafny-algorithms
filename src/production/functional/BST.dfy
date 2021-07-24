@@ -114,8 +114,7 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
 {
   match tree {
     case Nil => List.Nil
-    case Node(left, x, right) => 
-      List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))
+    case Node(left, x, right) => List_Concat(BST_InOrder(left), Cons(x, BST_InOrder(right)))
   }
 }
 
