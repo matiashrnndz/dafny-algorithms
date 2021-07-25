@@ -6,6 +6,12 @@ datatype BST<T> = Nil | Node(left:BST<T>, data:T, right:BST<T>)
 
 // --------------------------------------- Predicates ------------------------------------------- //
 
+/** Predicado:
+ *
+ * Retorna un booleano dependiendo si se cumple o no
+ * la condición de ordenación de un BST.
+ *
+ */
 predicate bst_ordered(tree:BST<T>)
   decreases tree
 {
@@ -19,15 +25,12 @@ predicate bst_ordered(tree:BST<T>)
   }
 }
 
-predicate bst_lower_bound(tree:BST<T>, d:T)
-  decreases tree
-{
-  match tree {
-    case Nil => true
-    case Node(left, x, right) => d <= x && bst_lower_bound(left, d) && bst_lower_bound(right, d)
-  }
-}
-
+/** Predicado:
+ *
+ * Retorna verdadero cuando el elemento 'd', es cota superior
+ * a todos los elementos del BST.
+ *
+ */
 predicate bst_upper_bound(tree:BST<T>, d:T)
   decreases tree
 {
@@ -37,8 +40,29 @@ predicate bst_upper_bound(tree:BST<T>, d:T)
   }
 }
 
+/** Predicado:
+ *
+ * Retorna verdadero cuando el elemento 'd', es cota inferior
+ * a todos los elementos del BST.
+ *
+ */
+predicate bst_lower_bound(tree:BST<T>, d:T)
+  decreases tree
+{
+  match tree {
+    case Nil => true
+    case Node(left, x, right) => d <= x && bst_lower_bound(left, d) && bst_lower_bound(right, d)
+  }
+}
+
 // ------------------------------------ Function Methods ---------------------------------------- //
 
+/** Funcionalidad:
+ *
+ * Recibe como parámetro un BST y lo transforma en
+ * un multiset de sus elementos.
+ *
+ */
 function method BST_ToMultiset(tree:BST<T>) : multiset<T>
   decreases tree
 {
@@ -48,19 +72,10 @@ function method BST_ToMultiset(tree:BST<T>) : multiset<T>
   }
 }
 
-/** Properties:
+/** Funcionalidad:
  *
- *  Lemma_BSTInsertIntegrity(tree, d)
- *    ==> ensures BST_ToMultiset(tree) + multiset{d} == BST_ToMultiset(BST_Insert(tree, d))
- *
- *  Lemma_BSTInsertOrdering(tree, d)
- *    ==> ensures bst_ordered(BST_Insert(tree, d))
- *
- *  Lemma_BSTInsertUpperBound(tree, d, b)
- *    ==> ensures bst_upper_bound(BST_Insert(tree, d), b)
- *
- *  Lemma_BSTInsertLowerBound(tree, d, b)
- *    ==> ensures bst_lower_bound(BST_Insert(tree, d), b)
+ * Recibe como parámetro un BST y un valor y retorna
+ * un BST con el valor insertado de manera ordenada.
  *
  */
 function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
@@ -76,13 +91,10 @@ function method BST_Insert(tree:BST<T>, d:T) : (result:BST<T>)
   }
 }
 
-/** Properties:
+/** Funcionalidad:
  *
- *  Lemma_BSTLoadIntegrity(list:List<T>)
- *    ==> ensures List_ToMultiset(list) == BST_ToMultiset(BST_Load(list))
- *
-*  Lemma_BSTLoadOrdering(list)
- *    ==> ensures bst_ordered(BST_Load(list))
+ * Recibe como parámetro una lista y genera un BST
+ * cargando dichos elementos.
  *
  */
 function method BST_Load(list:List<T>) : (tree:BST<T>)
@@ -94,19 +106,10 @@ function method BST_Load(list:List<T>) : (tree:BST<T>)
   }
 }
 
-/** Properties:
+/** Funcionalidad:
  *
- *  Lemma_BSTInOrderIntegrity(tree)
- *    ==> ensures List_ToMultiset(BST_InOrder(tree)) == BST_ToMultiset(tree)
- *
- *  Lemma_BSTInOrderOrdering(tree)
- *    ==> ensures list_increasing(BST_InOrder(tree))
- *
- *  Lemma_BSTInOrderUpperBound(tree, d)
- *    ==> ensures list_upper_bound(BST_InOrder(tree), d)
- *
- *  Lemma_BSTInOrderLowerBound(tree, d)
- *    ==> ensures list_lower_bound(BST_InOrder(tree), d)
+ * Recibe como parámetro un BST y retorna una lista
+ * con los elementos ordenados de manera creciente.
  *
  */
 function method BST_InOrder(tree:BST<T>) : (result:List<T>)
@@ -120,6 +123,13 @@ function method BST_InOrder(tree:BST<T>) : (result:List<T>)
 
 // ------------------------------------ BST_Insert Lemmas --------------------------------------- //
 
+/** Propiedad:
+ *
+ * Asegura que el multiset de elementos resultante al haber sido insertado
+ * un elemento en un BST utilizando la función BST_Insert, sea equivalente
+ * a la unión del multiset del BST y del multiset del elemento.
+ *
+ */
 lemma {:induction tree} Lemma_BSTInsertIntegrity(tree:BST<T>, d:T)
   ensures BST_ToMultiset(BST_Insert(tree, d)) == BST_ToMultiset(tree) + multiset{d}
   decreases tree
@@ -175,6 +185,12 @@ lemma {:induction tree} Lemma_BSTInsertIntegrity(tree:BST<T>, d:T)
   }
 }
 
+/** Propiedad:
+ *
+ * Asegura que el BST resultante de la inserción de un elemento
+ * utilizando la función BST_Insert, esté ordenado.
+ *
+ */
 lemma {:induction tree} Lemma_BSTInsertOrdering(tree:BST<T>, d:T)
   requires bst_ordered(tree)
   ensures bst_ordered(BST_Insert(tree, d))
@@ -217,6 +233,13 @@ lemma {:induction tree} Lemma_BSTInsertOrdering(tree:BST<T>, d:T)
   }
 }
 
+/** Propiedad:
+ *
+ * Dado un elemento 'b' que pertenezca al BST y sea cota superior del mismo
+ * y otro elemento 'd' a insertar por BST_Insert que sea mayor o igual a 'b',
+ * asegura que el elemento 'd' también sea cota superior del BST.
+ *
+ */
 lemma {:induction tree} Lemma_BSTInsertUpperBound(tree:BST<T>, d:T, b:T)
   requires bst_ordered(tree)
   requires bst_upper_bound(tree, b)
@@ -255,6 +278,13 @@ lemma {:induction tree} Lemma_BSTInsertUpperBound(tree:BST<T>, d:T, b:T)
   }
 }
 
+/** Propiedad:
+ *
+ * Dado un elemento 'b' que pertenezca al BST y sea cota inferior del mismo
+ * y otro elemento 'd' a insertar por BST_Insert que sea menor o igual a 'b',
+ * asegura que el elemento 'd' también sea cota inferior del BST.
+ *
+ */
 lemma {:induction tree} Lemma_BSTInsertLowerBound(tree:BST<T>, d:T, b:T)
   requires bst_ordered(tree)
   requires bst_lower_bound(tree, b)
@@ -295,6 +325,12 @@ lemma {:induction tree} Lemma_BSTInsertLowerBound(tree:BST<T>, d:T, b:T)
 
 // ------------------------------------- BST_Load Lemmas ---------------------------------------- //
 
+/** Propiedad:
+ *
+ * Asegurar que el multiset de elementos de la lista inicial, sea el mismo
+ * que el multiset de elementos luego de haberse aplicado BST_Load.
+ *
+ */
 lemma {:induction list} Lemma_BSTLoadIntegrity(list:List<T>)
   ensures BST_ToMultiset(BST_Load(list)) == List_ToMultiset(list)
   decreases list
@@ -329,6 +365,11 @@ lemma {:induction list} Lemma_BSTLoadIntegrity(list:List<T>)
   }
 }
 
+/** Propiedad:
+ *
+ * Asegurar que el resultado de la función BST_Load esté ordenado.
+ *
+ */
 lemma {:induction list} Lemma_BSTLoadOrdering(list:List<T>)
   ensures bst_ordered(BST_Load(list))
   decreases list
@@ -360,9 +401,11 @@ lemma {:induction list} Lemma_BSTLoadOrdering(list:List<T>)
 
 // ----------------------------------- BST_InOrder Lemmas --------------------------------------- //
 
-/*
+/** Propiedad:
+ *
  * Asegura que se mantenga la integridad de los datos entre
  * el BST inicial y la lista retornada por la función BST_InOrder.
+ *
  */
 lemma {:induction tree} Lemma_BSTInOrderIntegrity(tree:BST<T>)
   ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
@@ -410,6 +453,12 @@ lemma {:induction tree} Lemma_BSTInOrderIntegrity(tree:BST<T>)
   }
 }
 
+/** Propiedad:
+ *
+ * Asegura que el resultado de aplicar BST_InOrder sobre un BST,
+ * retorne una lista ordenada creciente.
+ *
+ */
 lemma {:induction tree} Lemma_BSTInOrderOrdering(tree:BST<T>)
   requires bst_ordered(tree)
   ensures list_increasing(BST_InOrder(tree))
@@ -442,6 +491,12 @@ lemma {:induction tree} Lemma_BSTInOrderOrdering(tree:BST<T>)
   }
 }
 
+/** Propiedad:
+ *
+ * Asegura que si un elemento es cota superior del BST,
+ * también lo es de la lista ordenada in order de dicho BST.
+ *
+ */
 lemma {:induction tree} Lemma_BSTInOrderUpperBound(tree:BST<T>, d:T)
   requires bst_ordered(tree)
   requires bst_upper_bound(tree, d)
@@ -474,6 +529,12 @@ lemma {:induction tree} Lemma_BSTInOrderUpperBound(tree:BST<T>, d:T)
   }
 }
 
+/** Propiedad:
+ *
+ * Asegura que si un elemento es cota inferior del BST,
+ * también lo es de la lista ordenada in order de dicho BST.
+ *
+ */
 lemma {:induction tree} Lemma_BSTInOrderLowerBound(tree:BST<T>, d:T)
   requires bst_ordered(tree)
   requires bst_lower_bound(tree, d)
