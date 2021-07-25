@@ -360,6 +360,10 @@ lemma {:induction list} Lemma_BSTLoadOrdering(list:List<T>)
 
 // ----------------------------------- BST_InOrder Lemmas --------------------------------------- //
 
+/*
+ * Asegura que se mantenga la integridad de los datos entre
+ * el BST inicial y la lista retornada por la función BST_InOrder.
+ */
 lemma {:induction tree} Lemma_BSTInOrderIntegrity(tree:BST<T>)
   ensures BST_ToMultiset(tree) == List_ToMultiset(BST_InOrder(tree))
   decreases tree

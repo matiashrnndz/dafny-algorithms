@@ -6,6 +6,11 @@ datatype List<T> = Nil | Cons(head:T, tail:List<T>)
 
 // --------------------------------------- Predicates ------------------------------------------- //
 
+/** Predicado:
+ *
+ * Retorna verdadero cuando la lista está ordenada de manera creciente.
+ *
+ */
 predicate list_increasing(list:List<T>)
   decreases list
 {
@@ -16,15 +21,12 @@ predicate list_increasing(list:List<T>)
   }
 }
 
-predicate list_lower_bound(list:List<T>, d:T)
-  decreases list
-{
-  match list {
-    case Nil => true
-    case Cons(head, tail) => (d <= head) && list_lower_bound(tail, d)
-  }
-}
-
+/** Predicado:
+ *
+ * Retorna verdadero cuando el elemento “d”, es cota superior
+ * a todos los elementos de una lista.
+ *
+ */
 predicate list_upper_bound(list:List<T>, d:T)
   decreases list
 {
@@ -34,8 +36,28 @@ predicate list_upper_bound(list:List<T>, d:T)
   }
 }
 
+/** Predicado:
+ *
+ * Retorna verdadero cuando el elemento “d”, es cota inferior
+ * a todos los elementos de una lista.
+ *
+ */
+predicate list_lower_bound(list:List<T>, d:T)
+  decreases list
+{
+  match list {
+    case Nil => true
+    case Cons(head, tail) => (d <= head) && list_lower_bound(tail, d)
+  }
+}
+
 // ------------------------------------ Function Methods ---------------------------------------- //
 
+/** Funcionalidad:
+ *
+ * Convertierte los elementos de una lista en un multiset de sus elementos.
+ *
+ */
 function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
   decreases list
 {
@@ -45,25 +67,10 @@ function method List_ToMultiset(list:List<T>) : (m:multiset<T>)
   }
 }
 
-/** Properties:
+/** Funcionalidad:
  *
- *  Lemma_ListConcatIntegrity(a, b)
- *    ==> ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
- *
- *  Lemma_ListConcatBothListEmpty(List.Nil, List.Nil)
- *    ==> ensures List_Concat(a, b) == List.Nil
- *
- *  Lemma_ListConcatFirstListEmpty(List.Nil, b)
- *    ==> ensures List_Concat(List.Nil, b) == b
- *
- *  Lemma_ListConcatWithMidElemOrdering(a, x, b)
- *    ==> ensures list_increasing(List_Concat(a, Cons(x, b)))
- *
- *  Lemma_ListConcatUpperBound(a, b, d, x)
- *    ==> ensures list_upper_bound(List_Concat(a, Cons(x, b)), d)
- *
- *  Lemma_ListConcatLowerBound(a, b, d, x)
- *    ==> ensures list_lower_bound(List_Concat(a, Cons(x, b)), d)
+ * Recibe como parámetros dos listas y como resultado concatena al
+ * final de la primera lista, toda la segunda lista.
  *
  */
 function method List_Concat(a:List<T>, b:List<T>) : List<T>
@@ -77,6 +84,12 @@ function method List_Concat(a:List<T>, b:List<T>) : List<T>
 
 // ------------------------------------ List_Concat Lemmas -------------------------------------- //
 
+/** Propiedad:
+ *
+ * Asegura que la unión de los elementos de ambas listas que recibe como parámetro
+ * List_Concat, sean los mismos que los elementos de las listas concatenadas.
+ *
+ */
 lemma {:induction a} Lemma_ListConcatIntegrity(a:List<T>, b:List<T>)
   ensures List_ToMultiset(List_Concat(a, b)) == List_ToMultiset(a) + List_ToMultiset(b)
   decreases a, b
@@ -111,6 +124,12 @@ lemma {:induction a} Lemma_ListConcatIntegrity(a:List<T>, b:List<T>)
   }
 }
 
+/** Propiedad:
+ *
+ * Asegura que al aplicarse la concatenación de dos listas vacías,
+ * el resultado sea una lista vacía.
+ *
+ */
 lemma {:induction a, b} Lemma_ListConcatBothListEmpty(a:List<T>, b:List<T>)
   requires a == List.Nil
   requires b == List.Nil
@@ -127,6 +146,12 @@ lemma {:induction a, b} Lemma_ListConcatBothListEmpty(a:List<T>, b:List<T>)
   }
 }
 
+/** Propiedad:
+ *
+ * Asegura que al aplicarse la concatenación de listas con la primera
+ * lista vacía, el resultado sea la segunda lista.
+ *
+ */
 lemma {:induction a} Lemma_ListConcatFirstListEmpty(a:List<T>, b:List<T>)
   requires a == List.Nil
   ensures List_Concat(a, b) == b
@@ -140,6 +165,13 @@ lemma {:induction a} Lemma_ListConcatFirstListEmpty(a:List<T>, b:List<T>)
   }
 }
 
+/** Propiedad:
+ *
+ * Dadas dos listas ordenadas y un elemento que sea cota superior de la primera
+ * y cota inferior de la segunda, asegura que la concatenación de las dos listas
+ * y el elemento en el medio, también esté ordenado.
+ *
+ */
 lemma {:induction a, b} Lemma_ListConcatWithMidElemOrdering(a:List<T>, x:T, b:List<T>)
   requires list_increasing(a)
   requires list_increasing(b)
@@ -198,6 +230,12 @@ lemma {:induction a, b} Lemma_ListConcatWithMidElemOrdering(a:List<T>, x:T, b:Li
   }
 }
 
+/** Propiedad:
+ *
+ * Asegura que si un elemento es cota superior de dos listas,
+ * también es cota superior de la concatenación de ambas listas.
+ *
+ */
 lemma {:induction listLeft} Lemma_ListConcatUpperBound(listLeft:List<T>, listRight:List<T>, d:T, x:T)
   requires list_upper_bound(listLeft, d)
   requires list_upper_bound(listRight, d)
@@ -252,6 +290,12 @@ lemma {:induction listLeft} Lemma_ListConcatUpperBound(listLeft:List<T>, listRig
   }
 }
 
+/** Propiedad:
+ *
+ * Asegura que si un elemento es cota inferior de dos listas,
+ * también es cota inferior de la concatenación de ambas listas.
+ *
+ */
 lemma {:induction listLeft} Lemma_ListConcatLowerBound(listLeft:List<T>, listRight:List<T>, d:T, x:T)
   requires list_lower_bound(listLeft, d)
   requires list_lower_bound(listRight, d)
