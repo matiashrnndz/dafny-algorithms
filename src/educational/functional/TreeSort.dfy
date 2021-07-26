@@ -2,13 +2,12 @@ include "./BST.dfy"
 
 // ------------------------------------ Function Methods ---------------------------------------- //
 
-/** Properties:
+/** Funcionalidad:
  *
- *  Lemma_TreeSortIntegrity
- *    ==> ensures List_ToMultiset(TreeSort(list)) == List_ToMultiset(list)
- *
- *  Lemma_TreeSortOrdering(list)
- *    ==> ensures list_increasing(TreeSort(list))
+ * Es un algoritmo de ordenamiento basado en la estructura de datos
+ * BST, que recibe como parámetro una lista y luego de haber
+ * cargado un BST con sus elementos y haber obtenido una lista
+ * in order de dichos elementos, la retorna como resultado.
  *
  */
 function method TreeSort(list:List<int>) : (sortedList:List<int>)
@@ -19,6 +18,12 @@ function method TreeSort(list:List<int>) : (sortedList:List<int>)
 
 // ------------------------------------- TreeSort Lemmas ---------------------------------------- //
 
+/** Propiedad:
+ *
+ * Asegura que se mantenga la integridad de los elementos luego de
+ * haber sido aplicada la función TreeSort a una lista.
+ *
+ */
 lemma Lemma_TreeSortIntegrity(list:List<T>)
   ensures List_ToMultiset(TreeSort(list)) == List_ToMultiset(list)
 {
@@ -33,6 +38,12 @@ lemma Lemma_TreeSortIntegrity(list:List<T>)
   }
 }
 
+/** Propiedad:
+ *
+ * Asegura que el resultado de haber sido aplicada la función
+ * TreeSort a una lista, sea una lista ordenada.
+ *
+ */
 lemma Lemma_TreeSortOrdering(list:List<T>)
   ensures list_increasing(TreeSort(list))
 {
