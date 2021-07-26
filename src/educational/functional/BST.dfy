@@ -236,8 +236,8 @@ lemma {:induction tree} Lemma_BSTInsertOrdering(tree:BST<T>, d:T)
 /** Propiedad:
  *
  * Dado un elemento 'b' que pertenezca al BST y sea cota superior del mismo
- * y otro elemento 'd' a insertar por BST_Insert que sea mayor o igual a 'b',
- * asegura que el elemento 'd' también sea cota superior del BST.
+ * y otro elemento 'd' a insertar por BST_Insert que sea menor a 'b',
+ * asegura que el elemento 'b' también sea cota superior del BST con el elemento 'd' insertado.
  *
  */
 lemma {:induction tree} Lemma_BSTInsertUpperBound(tree:BST<T>, d:T, b:T)
@@ -281,8 +281,8 @@ lemma {:induction tree} Lemma_BSTInsertUpperBound(tree:BST<T>, d:T, b:T)
 /** Propiedad:
  *
  * Dado un elemento 'b' que pertenezca al BST y sea cota inferior del mismo
- * y otro elemento 'd' a insertar por BST_Insert que sea menor o igual a 'b',
- * asegura que el elemento 'd' también sea cota inferior del BST.
+ * y otro elemento 'd' a insertar por BST_Insert que sea mayor o igual a 'b',
+ * asegura que el elemento 'b' también sea cota inferior del BST con el elemento 'd' insertado.
  *
  */
 lemma {:induction tree} Lemma_BSTInsertLowerBound(tree:BST<T>, d:T, b:T)

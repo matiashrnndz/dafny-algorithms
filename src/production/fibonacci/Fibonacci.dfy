@@ -11,12 +11,9 @@ function method Fibonacci_Recursive(n: nat): nat
 
 // --------------------------------- Fibonacci_TailRecursive ------------------------------------ //
 
-/** Properties:
+/** Nota:
  *
- *  Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n: nat, i: nat)
- *    ==> Fibonacci_TailRecursive(n-i, Fibonacci_Recursive(i), Fibonacci_Recursive(i+1)) == Fibonacci_Recursive(n)
- *
- *  Note: Initial call should be with a=0 and b=1
+ * La llamada inicial debería ser con a=0 and b=1
  *
  */
 function method Fibonacci_TailRecursive(n: nat, a: nat, b: nat): nat
@@ -28,12 +25,6 @@ function method Fibonacci_TailRecursive(n: nat, a: nat, b: nat): nat
 
 // --------------------------------- Fibonacci_RecursivePair ------------------------------------ //
 
-/** Properties:
- *
- *  Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n) 
- *    ==> ensures Fibonacci_RecursivePair(n) == Fibonacci_Recursive(n)
- *
- */
 function method Fibonacci_RecursivePair(n: nat): nat
 {
   match Fibonacci_RecursivePairAux(n) {
@@ -41,12 +32,6 @@ function method Fibonacci_RecursivePair(n: nat): nat
   }
 }
 
-/** Properties:
- *
- *  Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n) 
- *    ==> ensures Fibonacci_RecursivePairAux(n) == (Fibonacci_Recursive(n), Fibonacci_Recursive(n+1))
- *
- */
 function method Fibonacci_RecursivePairAux(n: nat): (nat, nat)
   decreases n
 {
@@ -78,6 +63,12 @@ method Fibonacci_Iterative(n: nat) returns (a: nat)
 
 // ------------------------------- Fibonacci_TailRecursive Lemmas ------------------------------- //
 
+/** Propiedad:
+ *
+ * asegurar para todo 'n', que la función Fibonacci_TailRecursive retorna
+ * el mismo resultado que la función Fibonacci_Recursive.
+ *
+ */
 lemma {:induction n, i} Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n: nat, i: nat)
   requires 0 <= n
   requires 0 <= i <= n
@@ -96,10 +87,23 @@ lemma {:induction n, i} Lemma_FibonacciTailRecursiveEqualsFibonacciRecursive(n: 
 
 // ------------------------------- Fibonacci_RecursivePair Lemmas ------------------------------- //
 
+/** Propiedad:
+ *
+ * Asegura para todo 'n', que la función Fibonacci_RecursivePair retorna
+ * un resultado equivalente a la función Fibonacci_Recursive.
+ *
+ */
 lemma {:induction n} Lemma_FibonacciRecursivePairEqualsFibonacciRecursive(n: nat)
   ensures Fibonacci_RecursivePair(n) == Fibonacci_Recursive(n)
 { }
 
+/** Propiedad:
+ *
+ * Asegura para todo 'n', que la función Fibonacci_RecursivePairAux retorna como
+ * resultado un par ordenado con el primer elemento equivalente a Fibonacci_Recursive
+ * de 'n' y el segundo elemento equivalente a Fibonacci_Recursive de 'n+1'.
+ *
+ */
 lemma {:induction n} Lemma_FibonacciRecursivePairAuxEqualsFibonacciRecursive(n: nat)
   ensures Fibonacci_RecursivePairAux(n) == (Fibonacci_Recursive(n), Fibonacci_Recursive(n+1))
   decreases n
